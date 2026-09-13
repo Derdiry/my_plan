@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#10131c">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Phase 1 — Your Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#10131c;
+    --panel:#1a2030;
+    --panel-2:#1f2636;
+    --panel-border:#262d40;
+    --accent:#c99a3b;
+    --accent-2:#7c9473;
+    --text:#ede7da;
+    --text-muted:#8890a0;
+    --font-display:'Oswald',sans-serif;
+    --font-body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    display:flex;
+    justify-content:center;
+  }
+  #app{
+    width:100%;
+    max-width:480px;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+
+  header{
+    padding:calc(env(safe-area-inset-top) + 18px) 20px 14px;
+    animation:fadeDown .5s ease both;
+  }
+  @keyframes fadeDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+  .badge{
+    display:inline-block;
+    font-size:12.5px;
+    letter-spacing:.02em;
+    color:var(--accent);
+    background:rgba(201,154,59,.12);
+    border:1px solid rgba(201,154,59,.35);
+    padding:4px 10px;
+    border-radius:100px;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:26px;
+    margin:0;
+    line-height:1.15;
+  }
+
+  main{
+    flex:1;
+    overflow-y:auto;
+    padding:4px 20px 116px;
+    -webkit-overflow-scrolling:touch;
+  }
+  section{display:none;}
+  section.active{display:block;}
+
+  .day-strip{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:6px 2px 16px;
+    margin-bottom:6px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .day-strip::-webkit-scrollbar{display:none;}
+  .day-chip{
+    flex:0 0 auto;
+    font-family:var(--font-display);
+    font-size:14px;
+    font-weight:500;
+    color:var(--text-muted);
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    padding:9px 14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    line-height:1.2;
+    min-width:56px;
+    cursor:pointer;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  .day-chip small{font-family:var(--font-body);font-size:11px;font-weight:400;color:var(--text-muted);margin-top:2px;}
+  .day-chip.active{color:#161822;background:var(--accent);border-color:var(--accent);}
+  .day-chip.active small{color:#161822;opacity:.75;}
+  .day-chip.diet-chip.active{background:var(--accent-2);border-color:var(--accent-2);}
+
+  .day-title{font-family:var(--font-display);font-size:20px;font-weight:600;margin:4px 0 2px;}
+  .day-sub{color:var(--text-muted);font-size:14px;margin:0 0 4px;}
+  .progress-line{font-size:13px;color:var(--accent);margin:0 0 14px;font-weight:600;}
+
+  /* Exercise card */
+  .ex-card{
+    border-left:3px solid var(--accent);
+    background:var(--panel);
+    border-radius:6px;
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  .ex-head{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    padding:13px 12px 13px 14px;
+    cursor:pointer;
+  }
+  .ex-check{
+    flex:0 0 auto;
+    width:22px;height:22px;
+    border-radius:6px;
+    border:2px solid var(--panel-border);
+    background:transparent;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--bg);
+    font-size:14px;
+    font-weight:700;
+  }
+  .ex-check.done{background:var(--accent);border-color:var(--accent);}
+  .ex-icon{flex:0 0 auto;width:38px;height:38px;color:var(--accent);}
+  .ex-icon svg{width:100%;height:100%;}
+  .ex-body{flex:1;min-width:0;}
+  .ex-name{font-weight:600;font-size:15px;margin:0;}
+  .ex-name.done-text{color:var(--text-muted);text-decoration:line-through;}
+  .ex-meta{font-size:13px;color:var(--text-muted);margin:1px 0 0;}
+  .ex-chevron{flex:0 0 auto;color:var(--text-muted);font-size:13px;transition:transform .2s ease;}
+  .ex-card.open .ex-chevron{transform:rotate(90deg);}
+
+  .ex-detail{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .ex-card.open .ex-detail{max-height:900px;}
+  .ex-detail-inner{padding:2px 16px 18px;border-top:1px solid var(--panel-border);}
+  .ex-illustration{width:100%;height:190px;color:var(--accent);margin:14px 0 12px;background:rgba(255,255,255,.03);border-radius:8px;}
+  .ex-illustration svg{width:100%;height:100%;}
+  .ex-step{margin:0 0 10px;font-size:13.5px;line-height:1.5;}
+  .ex-step b{color:var(--accent);display:block;font-size:11.5px;letter-spacing:.03em;margin-bottom:2px;}
+  .ex-mistake{
+    background:rgba(201,154,59,.1);
+    border:1px solid rgba(201,154,59,.3);
+    border-radius:8px;
+    padding:10px 12px;
+    font-size:13px;
+    margin-top:8px;
+  }
+  .ex-mistake b{color:var(--accent);}
+  .demo-link{
+    display:block;text-align:center;
+    margin-top:12px;
+    padding:11px 0;
+    border-radius:8px;
+    background:rgba(201,154,59,.14);
+    border:1px solid rgba(201,154,59,.4);
+    color:var(--accent);
+    font-weight:600;font-size:13.5px;
+    text-decoration:none;
+  }
+  .log-box{background:var(--panel-2);border:1px solid var(--panel-border);border-radius:8px;padding:12px;margin-top:12px;}
+  .log-title{font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:600;}
+  .log-inputs{display:flex;gap:8px;}
+  .log-input{
+    flex:1;min-width:0;background:var(--panel);border:1px solid var(--panel-border);
+    border-radius:6px;color:var(--text);font-size:14px;padding:8px 10px;font-family:var(--font-body);
+  }
+  .log-inputs button{all:unset;background:var(--accent);color:#161822;font-weight:600;font-size:13px;padding:0 14px;border-radius:6px;cursor:pointer;display:flex;align-items:center;white-space:nowrap;}
+  .log-entries{margin-top:10px;}
+  .log-entry{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-top:1px solid var(--panel-border);}
+  .log-remove{color:var(--text-muted);cursor:pointer;padding:0 4px;}
+
+  .warmup-card{
+    background:rgba(124,148,115,.1);
+    border:1px solid rgba(124,148,115,.3);
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:14px;
+    font-size:13.5px;
+  }
+  .warmup-card b{color:var(--accent-2);display:block;margin-bottom:6px;font-size:14px;}
+  .warmup-card ul{margin:0;padding-left:18px;}
+  .warmup-card li{margin-bottom:3px;}
+
+  .note-card{
+    background:rgba(124,148,115,.1);
+    border:1px solid rgba(124,148,115,.3);
+    border-radius:8px;
+    padding:14px 16px;
+    font-size:14px;
+    color:var(--text);
+    margin-top:6px;
+    margin-bottom:10px;
+  }
+  .note-card b{color:var(--accent-2);}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0 20px;}
+  .stat{background:var(--panel);border:1px solid var(--panel-border);border-radius:8px;padding:12px 6px;text-align:center;}
+  .stat .num{font-family:var(--font-display);font-size:19px;color:var(--accent-2);display:block;}
+  .stat .lbl{font-size:12px;color:var(--text-muted);}
+
+  h2.section-h{font-family:var(--font-display);font-size:17px;font-weight:600;margin:26px 0 10px;color:var(--text);}
+  h2.section-h:first-of-type{margin-top:6px;}
+  p.section-p{font-size:13.5px;color:var(--text-muted);margin:-4px 0 12px;line-height:1.5;}
+
+  .food-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+  .food-tag{font-size:13px;padding:6px 12px;border-radius:100px;background:rgba(124,148,115,.12);border:1px solid rgba(124,148,115,.3);color:var(--text);}
+
+  .meal{border-bottom:1px solid var(--panel-border);}
+  .meal:last-child{border-bottom:none;}
+  .meal-row{display:flex;justify-content:space-between;gap:10px;padding:12px 2px;}
+  .meal-name{font-weight:600;font-size:14px;color:var(--accent-2);flex:0 0 90px;}
+  .meal-desc{font-size:13.5px;color:var(--text);line-height:1.5;}
+
+  .taper-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--panel-border);font-size:14px;}
+  .taper-row:last-child{border-bottom:none;}
+  .taper-week{font-family:var(--font-display);color:var(--accent-2);flex:0 0 78px;font-size:13.5px;}
+
+  .tracker-card{background:var(--panel);border:1px solid var(--panel-border);border-radius:10px;padding:16px;margin-bottom:8px;}
+  .tracker-num{font-family:var(--font-display);font-size:30px;margin-bottom:2px;}
+  .tracker-num small{font-family:var(--font-body);font-size:13px;color:var(--text-muted);font-weight:400;}
+  .tracker-goal{font-size:12.5px;color:var(--text-muted);margin-bottom:12px;}
+  .tracker-btns{display:flex;gap:8px;}
+  .tracker-btns button{
+    all:unset;flex:1;text-align:center;
+    background:var(--accent);color:#161822;
+    font-weight:600;font-size:13.5px;
+    padding:10px 0;border-radius:8px;cursor:pointer;
+  }
+  .tracker-btns button.ghost{background:transparent;color:var(--text-muted);border:1px solid var(--panel-border);}
+  .weight-input-row{display:flex;gap:8px;margin-bottom:12px;}
+  .weight-input-row input{
+    flex:1;background:var(--panel-2);border:1px solid var(--panel-border);
+    border-radius:8px;color:var(--text);font-size:15px;padding:10px 12px;font-family:var(--font-body);
+  }
+  .weight-input-row button{all:unset;background:var(--accent-2);color:#161822;font-weight:600;padding:0 18px;border-radius:8px;cursor:pointer;display:flex;align-items:center;}
+  .weight-entry{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--panel-border);font-size:14px;}
+  .weight-entry:last-child{border-bottom:none;}
+  .trend{font-weight:600;font-size:13px;margin-left:8px;}
+  .trend.down{color:var(--accent-2);}
+  .trend.up{color:#c47b5a;}
+  .trend.same{color:var(--text-muted);}
+  .tracker-hint{font-size:11.5px;color:var(--text-muted);margin-top:10px;font-style:italic;}
+
+  nav.tabbar{
+    position:fixed;bottom:0;left:0;right:0;
+    display:flex;justify-content:center;
+    background:rgba(16,19,28,.92);
+    backdrop-filter:blur(14px);
+    border-top:1px solid var(--panel-border);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .tabbar-inner{width:100%;max-width:480px;display:flex;}
+  .tab-btn{
+    all:unset;flex:1;text-align:center;
+    padding:12px 0 10px;
+    font-family:var(--font-body);font-size:12px;font-weight:600;
+    color:var(--text-muted);cursor:pointer;
+  }
+  .tab-btn .tab-ic{display:block;width:22px;height:22px;margin:0 auto 4px;}
+  .tab-btn.active{color:var(--accent);}
+  .tab-btn.active .tab-ic{color:var(--accent);}
+
+  /* Accessibility: all:unset above strips default focus rings — restore them for keyboard/switch-control use */
+  .tab-btn:focus-visible, .day-chip:focus-visible, .log-inputs button:focus-visible,
+  .tracker-btns button:focus-visible, .weight-input-row button:focus-visible,
+  .demo-link:focus-visible, .ex-check:focus-visible, .ex-head:focus-visible,
+  .log-remove:focus-visible, input:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+
+  /* Tap feedback */
+  .day-chip:active, .tab-btn:active, .ex-head:active, .log-inputs button:active,
+  .tracker-btns button:active, .weight-input-row button:active, .demo-link:active{
+    transform:scale(0.97);
+  }
+  .day-chip, .tab-btn, .log-inputs button, .tracker-btns button, .weight-input-row button, .demo-link{
+    transition:transform .08s ease;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <!-- LEG PRESS: seat back + moving sled plate -->
+      <symbol id="ic-legpress" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" stroke-linecap="round" fill="none">
+          <line x1="18" y1="18" x2="34" y2="54"/>
+          <line x1="34" y1="54" x2="58" y2="58"/>
+        </g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="27" cy="20" r="9" fill="currentColor" stroke="none"/>
+          <line x1="32" y1="27" x2="50" y2="50"/>
+          <line x1="36" y1="32" x2="22" y2="42"/>
+          <line x1="50" y1="50" x2="68" y2="48"/>
+          <line x1="68" y1="48" x2="80" y2="48"><animate attributeName="x2" values="80;62;80" dur="1.5s" repeatCount="indefinite"/></line>
+        </g>
+        <g stroke="#7c9473" stroke-width="8" stroke-linecap="round">
+          <line x1="80" y1="24" x2="80" y2="70">
+            <animate attributeName="x1" values="80;62;80" dur="1.5s" repeatCount="indefinite"/>
+            <animate attributeName="x2" values="80;62;80" dur="1.5s" repeatCount="indefinite"/>
+          </line>
+        </g>
+      </symbol>
+
+      <!-- STEP-UP: box + stepping figure -->
+      <symbol id="ic-stepup" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><rect x="55" y="66" width="30" height="20"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <g>
+            <circle cx="45" cy="18" r="9" fill="currentColor" stroke="none"/>
+            <line x1="45" y1="27" x2="45" y2="55"/>
+            <line x1="45" y1="32" x2="60" y2="26"/>
+            <line x1="45" y1="32" x2="30" y2="40"/>
+            <line x1="45" y1="55" x2="63" y2="66"/>
+            <line x1="45" y1="55" x2="30" y2="70"/>
+            <line x1="30" y1="70" x2="30" y2="90"/>
+            <animateTransform attributeName="transform" type="translate" values="0,0;0,-10;0,0" dur="1.5s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- CHEST PRESS MACHINE: weight stack + horizontal press -->
+      <symbol id="ic-chestpress" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none">
+          <line x1="72" y1="15" x2="72" y2="85"/>
+          <line x1="78" y1="25" x2="90" y2="25"/><line x1="78" y1="40" x2="90" y2="40"/><line x1="78" y1="55" x2="90" y2="55"/>
+        </g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="28" cy="20" r="9" fill="currentColor" stroke="none"/>
+          <line x1="28" y1="29" x2="28" y2="58"/>
+          <line x1="28" y1="58" x2="40" y2="88"/>
+          <line x1="28" y1="58" x2="16" y2="88"/>
+          <line x1="28" y1="34" x2="44" y2="40"><animate attributeName="x2" values="44;62;44" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="28" y1="34" x2="44" y2="28"><animate attributeName="x2" values="44;62;44" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- SHOULDER PRESS MACHINE: weight stack + vertical press -->
+      <symbol id="ic-shoulderpress" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none">
+          <line x1="80" y1="15" x2="80" y2="85"/>
+          <line x1="86" y1="25" x2="96" y2="25"/><line x1="86" y1="40" x2="96" y2="40"/><line x1="86" y1="55" x2="96" y2="55"/>
+        </g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="32" cy="24" r="9" fill="currentColor" stroke="none"/>
+          <line x1="32" y1="33" x2="32" y2="62"/>
+          <line x1="32" y1="62" x2="44" y2="90"/>
+          <line x1="32" y1="62" x2="20" y2="90"/>
+          <line x1="32" y1="38" x2="47" y2="46"><animate attributeName="x2" values="47;35;47" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="46;16;46" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="32" y1="38" x2="17" y2="46"><animate attributeName="x2" values="17;29;17" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="46;16;46" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- LAT PULLDOWN: cable tower + wide bar -->
+      <symbol id="ic-latpulldown" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="50" y1="8" x2="50" y2="20"/><circle cx="50" cy="8" r="5"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="45" cy="34" r="9" fill="currentColor" stroke="none"/>
+          <line x1="45" y1="43" x2="45" y2="66"/>
+          <line x1="45" y1="66" x2="58" y2="90"/>
+          <line x1="45" y1="66" x2="32" y2="90"/>
+          <line x1="30" y1="20" x2="70" y2="20"><animate attributeName="y1" values="20;44;20" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="20;44;20" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="45" y1="43" x2="30" y2="20"><animate attributeName="y2" values="20;44;20" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="45" y1="43" x2="70" y2="20"><animate attributeName="y2" values="20;44;20" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- FACE PULL: cable at head height + rope -->
+      <symbol id="ic-facepull" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="85" y1="20" x2="85" y2="40"/><circle cx="85" cy="18" r="5"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="30" cy="24" r="9" fill="currentColor" stroke="none"/>
+          <line x1="30" y1="33" x2="30" y2="62"/>
+          <line x1="30" y1="62" x2="42" y2="90"/>
+          <line x1="30" y1="62" x2="18" y2="90"/>
+          <line x1="30" y1="38" x2="60" y2="34"><animate attributeName="x2" values="60;38;60" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="30" y1="38" x2="60" y2="42"><animate attributeName="x2" values="60;38;60" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- CABLE ROW: low pulley + seated pull -->
+      <symbol id="ic-cablerow" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="90" y1="60" x2="90" y2="80"/><circle cx="90" cy="82" r="5"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="30" cy="40" r="9" fill="currentColor" stroke="none"/>
+          <line x1="30" y1="49" x2="34" y2="70"/>
+          <line x1="34" y1="70" x2="30" y2="90"/>
+          <line x1="34" y1="70" x2="50" y2="88"/>
+          <line x1="32" y1="55" x2="80" y2="60"><animate attributeName="x2" values="80;46;80" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- DUMBBELL PRESS: flat bench + two dumbbells -->
+      <symbol id="ic-dbpress" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="15" y1="72" x2="85" y2="72"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="22" cy="58" r="9" fill="currentColor" stroke="none"/>
+          <line x1="30" y1="60" x2="70" y2="60"/>
+          <line x1="45" y1="55" x2="45" y2="40"><animate attributeName="y2" values="40;18;40" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="55" y1="55" x2="55" y2="40"><animate attributeName="y2" values="40;18;40" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor">
+          <circle cx="45" cy="40" r="5"><animate attributeName="cy" values="40;18;40" dur="1.4s" repeatCount="indefinite"/></circle>
+          <circle cx="55" cy="40" r="5"><animate attributeName="cy" values="40;18;40" dur="1.4s" repeatCount="indefinite"/></circle>
+        </g>
+      </symbol>
+
+      <!-- INCLINE PRESS: tilted bench + dumbbell -->
+      <symbol id="ic-inclinepress" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="18" y1="85" x2="46" y2="33"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="36" cy="40" r="9" fill="currentColor" stroke="none"/>
+          <line x1="41" y1="46" x2="62" y2="64"/>
+          <line x1="46" y1="48" x2="62" y2="32"><animate attributeName="x2" values="62;76;62" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="32;16;32" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor"><circle cx="62" cy="32" r="5"><animate attributeName="cx" values="62;76;62" dur="1.4s" repeatCount="indefinite"/><animate attributeName="cy" values="32;16;32" dur="1.4s" repeatCount="indefinite"/></circle></g>
+      </symbol>
+
+      <!-- ROMANIAN DEADLIFT: hip hinge holding a bar -->
+      <symbol id="ic-hinge" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <line x1="50" y1="55" x2="50" y2="90"/>
+          <g>
+            <circle cx="50" cy="18" r="9" fill="currentColor" stroke="none"/>
+            <line x1="50" y1="27" x2="50" y2="55"/>
+            <line x1="50" y1="32" x2="66" y2="32"/>
+            <line x1="50" y1="32" x2="34" y2="32"/>
+            <circle cx="66" cy="32" r="4" fill="currentColor"/>
+            <circle cx="34" cy="32" r="4" fill="currentColor"/>
+            <animateTransform attributeName="transform" type="rotate" values="0 50 55; -45 50 55; 0 50 55" dur="1.6s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- STRETCH: standing reach -->
+      <symbol id="ic-stretch" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="50" cy="20" r="9" fill="currentColor" stroke="none"/>
+          <line x1="50" y1="29" x2="50" y2="60"/>
+          <line x1="50" y1="60" x2="62" y2="90"/>
+          <line x1="50" y1="60" x2="38" y2="90"/>
+          <line x1="50" y1="34" x2="30" y2="46"/>
+          <g><line x1="50" y1="34" x2="70" y2="16"/><animateTransform attributeName="transform" type="rotate" values="0 50 34;15 50 34;0 50 34" dur="2s" repeatCount="indefinite"/></g>
+        </g>
+      </symbol>
+
+      <!-- PUSH-UP: floor, bodyweight -->
+      <symbol id="ic-pushup" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="10" y1="80" x2="90" y2="80"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <g>
+            <circle cx="80" cy="55" r="9" fill="currentColor" stroke="none"/>
+            <line x1="73" y1="58" x2="25" y2="65"/>
+            <line x1="45" y1="62" x2="45" y2="80"/>
+            <line x1="70" y1="60" x2="70" y2="80"/>
+            <animateTransform attributeName="transform" type="translate" values="0,0;0,14;0,0" dur="1.4s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- CHEST FLY: wide arc with dumbbells/cable -->
+      <symbol id="ic-fly" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="50" cy="18" r="9" fill="currentColor" stroke="none"/>
+          <line x1="50" y1="27" x2="50" y2="58"/>
+          <line x1="50" y1="58" x2="62" y2="88"/>
+          <line x1="50" y1="58" x2="38" y2="88"/>
+          <line x1="50" y1="34" x2="78" y2="34"><animate attributeName="x2" values="78;56;78" dur="1.5s" repeatCount="indefinite"/></line>
+          <line x1="50" y1="34" x2="22" y2="34"><animate attributeName="x2" values="22;44;22" dur="1.5s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor">
+          <circle cx="78" cy="34" r="5"><animate attributeName="cx" values="78;56;78" dur="1.5s" repeatCount="indefinite"/></circle>
+          <circle cx="22" cy="34" r="5"><animate attributeName="cx" values="22;44;22" dur="1.5s" repeatCount="indefinite"/></circle>
+        </g>
+      </symbol>
+
+      <!-- LATERAL RAISE: dumbbells out to the sides -->
+      <symbol id="ic-lateralraise" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="50" cy="18" r="9" fill="currentColor" stroke="none"/>
+          <line x1="50" y1="27" x2="50" y2="58"/>
+          <line x1="50" y1="58" x2="62" y2="88"/>
+          <line x1="50" y1="58" x2="38" y2="88"/>
+          <line x1="50" y1="34" x2="58" y2="50"><animate attributeName="x2" values="58;78;58" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="50;34;50" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="50" y1="34" x2="42" y2="50"><animate attributeName="x2" values="42;22;42" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="50;34;50" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor">
+          <circle cx="58" cy="50" r="5"><animate attributeName="cx" values="58;78;58" dur="1.4s" repeatCount="indefinite"/><animate attributeName="cy" values="50;34;50" dur="1.4s" repeatCount="indefinite"/></circle>
+          <circle cx="42" cy="50" r="5"><animate attributeName="cx" values="42;22;42" dur="1.4s" repeatCount="indefinite"/><animate attributeName="cy" values="50;34;50" dur="1.4s" repeatCount="indefinite"/></circle>
+        </g>
+      </symbol>
+
+      <!-- FRONT RAISE: dumbbells straight out front -->
+      <symbol id="ic-frontraise" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="50" cy="18" r="9" fill="currentColor" stroke="none"/>
+          <line x1="50" y1="27" x2="50" y2="58"/>
+          <line x1="50" y1="58" x2="62" y2="88"/>
+          <line x1="50" y1="58" x2="38" y2="88"/>
+          <line x1="50" y1="34" x2="62" y2="46"><animate attributeName="y2" values="46;22;46" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="50" y1="34" x2="38" y2="46"><animate attributeName="y2" values="46;22;46" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor">
+          <circle cx="62" cy="46" r="5"><animate attributeName="cy" values="46;22;46" dur="1.4s" repeatCount="indefinite"/></circle>
+          <circle cx="38" cy="46" r="5"><animate attributeName="cy" values="46;22;46" dur="1.4s" repeatCount="indefinite"/></circle>
+        </g>
+      </symbol>
+
+      <!-- SINGLE-ARM ROW: bench + one dumbbell -->
+      <symbol id="ic-singlearmrow" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><rect x="15" y="55" width="30" height="10"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="55" cy="30" r="9" fill="currentColor" stroke="none"/>
+          <line x1="55" y1="39" x2="40" y2="55"/>
+          <line x1="40" y1="55" x2="30" y2="55"/>
+          <line x1="40" y1="55" x2="55" y2="75"/>
+          <line x1="40" y1="55" x2="70" y2="65"/>
+          <line x1="55" y1="45" x2="80" y2="55"><animate attributeName="x2" values="80;60;80" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="55;40;55" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor"><circle cx="80" cy="55" r="5"><animate attributeName="cx" values="80;60;80" dur="1.4s" repeatCount="indefinite"/><animate attributeName="cy" values="55;40;55" dur="1.4s" repeatCount="indefinite"/></circle></g>
+      </symbol>
+
+      <!-- PLANK -->
+      <symbol id="ic-plank" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="18" cy="50" r="9" fill="currentColor" stroke="none"/>
+          <line x1="27" y1="52" x2="80" y2="46"/>
+          <line x1="30" y1="55" x2="30" y2="78"/>
+          <line x1="55" y1="52" x2="55" y2="78"/>
+          <line x1="25" y1="52" x2="25" y2="66"/>
+          <animateTransform attributeName="transform" type="translate" values="0,0;0,2;0,0" dur="2.4s" repeatCount="indefinite"/>
+        </g>
+      </symbol>
+
+      <!-- DEAD BUG -->
+      <symbol id="ic-deadbug" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="50" cy="78" r="9" fill="currentColor" stroke="none"/>
+          <line x1="50" y1="69" x2="50" y2="50"/>
+          <line x1="50" y1="50" x2="66" y2="30"><animate attributeName="x2" values="66;74;66" dur="1.6s" repeatCount="indefinite"/><animate attributeName="y2" values="30;20;30" dur="1.6s" repeatCount="indefinite"/></line>
+          <line x1="50" y1="50" x2="34" y2="34"/>
+          <line x1="50" y1="69" x2="66" y2="52"/>
+          <line x1="50" y1="69" x2="34" y2="50"><animate attributeName="x2" values="34;26;34" dur="1.6s" repeatCount="indefinite"/><animate attributeName="y2" values="50;40;50" dur="1.6s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- BICYCLE CRUNCH -->
+      <symbol id="ic-bicyclecrunch" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="30" cy="60" r="9" fill="currentColor" stroke="none"/>
+          <line x1="38" y1="62" x2="58" y2="58"/>
+          <line x1="58" y1="58" x2="76" y2="46"><animate attributeName="x2" values="76;68;76" dur="1.2s" repeatCount="indefinite"/><animate attributeName="y2" values="46;70;46" dur="1.2s" repeatCount="indefinite"/></line>
+          <line x1="58" y1="58" x2="74" y2="76"><animate attributeName="x2" values="74;66;74" dur="1.2s" repeatCount="indefinite"/><animate attributeName="y2" values="76;50;76" dur="1.2s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- SIDE PLANK -->
+      <symbol id="ic-sideplank" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="20" cy="42" r="9" fill="currentColor" stroke="none"/>
+          <line x1="28" y1="45" x2="70" y2="55"/>
+          <line x1="35" y1="48" x2="35" y2="30"/>
+          <line x1="55" y1="52" x2="70" y2="80"/>
+          <line x1="55" y1="52" x2="70" y2="90"/>
+          <animateTransform attributeName="transform" type="translate" values="0,0;0,-3;0,0" dur="2.2s" repeatCount="indefinite"/>
+        </g>
+      </symbol>
+
+      <!-- CABLE WOODCHOP / RUSSIAN TWIST -->
+      <symbol id="ic-twist" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <line x1="50" y1="55" x2="50" y2="90"/>
+          <g>
+            <circle cx="50" cy="18" r="9" fill="currentColor" stroke="none"/>
+            <line x1="50" y1="27" x2="50" y2="55"/>
+            <line x1="26" y1="34" x2="74" y2="34"/>
+            <animateTransform attributeName="transform" type="rotate" values="0 50 55;-30 50 55;30 50 55;0 50 55" dur="1.8s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- CARDIO / RUNNING -->
+      <symbol id="ic-cardio" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="46" cy="18" r="9" fill="currentColor" stroke="none"/>
+          <line x1="46" y1="27" x2="52" y2="52"/>
+          <g><line x1="49" y1="32" x2="64" y2="26"/><animateTransform attributeName="transform" type="rotate" values="0 49 32;25 49 32;-20 49 32;0 49 32" dur="0.9s" repeatCount="indefinite"/></g>
+          <g><line x1="49" y1="32" x2="38" y2="42"/><animateTransform attributeName="transform" type="rotate" values="0 49 32;-20 49 32;25 49 32;0 49 32" dur="0.9s" repeatCount="indefinite"/></g>
+          <g><line x1="52" y1="52" x2="70" y2="60"/><line x1="70" y1="60" x2="68" y2="88"/><animateTransform attributeName="transform" type="rotate" values="0 52 52;-30 52 52;25 52 52;0 52 52" dur="0.9s" repeatCount="indefinite"/></g>
+          <g><line x1="52" y1="52" x2="34" y2="64"/><line x1="34" y1="64" x2="42" y2="90"/><animateTransform attributeName="transform" type="rotate" values="0 52 52;25 52 52;-30 52 52;0 52 52" dur="0.9s" repeatCount="indefinite"/></g>
+        </g>
+      </symbol>
+
+      <!-- SWIM -->
+      <symbol id="ic-swim" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="20" cy="50" r="8" fill="currentColor" stroke="none"/>
+          <line x1="27" y1="50" x2="78" y2="50"/>
+          <line x1="65" y1="50" x2="80" y2="60"/>
+          <line x1="65" y1="50" x2="80" y2="40"/>
+          <g><line x1="40" y1="50" x2="55" y2="34"/><animateTransform attributeName="transform" type="rotate" values="0 40 50;360 40 50" dur="1.6s" repeatCount="indefinite"/></g>
+          <path d="M8 56 q6 -6 12 0 q6 6 12 0"/>
+        </g>
+      </symbol>
+
+      <!-- REST -->
+      <symbol id="ic-rest" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <line x1="18" y1="72" x2="82" y2="72"/>
+          <line x1="18" y1="72" x2="18" y2="58"/>
+          <rect x="18" y="52" width="24" height="12" rx="4" fill="currentColor" stroke="none"/>
+          <line x1="42" y1="60" x2="82" y2="60"/>
+        </g>
+        <text x="66" y="34" font-family="Oswald, sans-serif" font-size="24" fill="currentColor">z</text>
+        <text x="76" y="22" font-family="Oswald, sans-serif" font-size="16" fill="currentColor">z</text>
+      </symbol>
+
+      <!-- HABITS TAB ICON -->
+      <symbol id="ic-guide" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="8" stroke-linecap="round" fill="none">
+          <rect x="24" y="14" width="52" height="72" rx="6"/>
+          <path d="M34 42 l6 6 l14 -14"/>
+          <line x1="58" y1="42" x2="68" y2="42"/>
+          <path d="M34 62 l6 6 l14 -14"/>
+          <line x1="58" y1="62" x2="68" y2="62"/>
+        </g>
+      </symbol>
+
+      <!-- WORKOUTS TAB ICON -->
+      <symbol id="ic-dumbbell" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"><line x1="30" y1="50" x2="70" y2="50"/></g>
+        <g fill="currentColor"><rect x="14" y="36" width="12" height="28" rx="4"/><rect x="74" y="36" width="12" height="28" rx="4"/></g>
+      </symbol>
+
+      <!-- DIET TAB ICON -->
+      <symbol id="ic-meal" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="8" stroke-linecap="round" fill="none">
+          <circle cx="42" cy="50" r="28"/>
+          <line x1="78" y1="20" x2="78" y2="80"/>
+          <line x1="70" y1="20" x2="70" y2="38"/>
+          <line x1="86" y1="20" x2="86" y2="38"/>
+          <line x1="70" y1="38" x2="86" y2="38"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <header>
+    <span class="badge">Phase 1 · Fat loss</span>
+    <h1>Your Plan</h1>
+  </header>
+
+  <main>
+    <!-- WORKOUTS -->
+    <section id="view-workouts" class="active">
+      <div class="day-strip" id="dayStrip"></div>
+      <div class="day-title" id="dayTitle"></div>
+      <p class="day-sub" id="daySub"></p>
+      <p class="progress-line" id="dayProgress"></p>
+      <div id="exerciseList"></div>
+    </section>
+
+    <!-- DIET -->
+    <section id="view-diet">
+      <h2 class="section-h" style="margin-top:6px;">Daily targets</h2>
+      <p class="section-p">Every day in the 8-day rotation below lands close to this.</p>
+      <div class="stat-grid">
+        <div class="stat"><span class="num">2,250</span><span class="lbl">kcal</span></div>
+        <div class="stat"><span class="num">188g</span><span class="lbl">protein</span></div>
+        <div class="stat"><span class="num">72g</span><span class="lbl">fat</span></div>
+        <div class="stat"><span class="num">197g</span><span class="lbl">carbs</span></div>
+      </div>
+      <div class="note-card"><b>Recheck every 4–6 weeks</b> — this target is right for 94kg. As you lose weight, your maintenance calories drop too, so the same 2,250 becomes a smaller deficit over time. Recalculate against your current weight every 4–6 weeks rather than eating this number for the whole phase.</div>
+
+      <h2 class="section-h">8-day meal rotation</h2>
+      <p class="section-p">Cycle through these — once you hit Day 8, go back to Day 1.</p>
+      <div class="day-strip" id="mealStrip"></div>
+      <div id="mealList"></div>
+
+      <div class="note-card" style="margin-top:18px;"><b>After training</b> — if your next meal is 2+ hours away: 250g Greek yogurt + a banana, or 2 boiled eggs + a piece of fruit. If your next meal is coming up soon, that's enough on its own.</div>
+
+      <h2 class="section-h">Eating with family</h2>
+      <p class="section-p">When it's a shared meal, not your own plate:</p>
+      <div class="note-card"><b>Build your plate</b> — protein first (fill a third of the plate), a modest portion of rice, then load up on any vegetables or salad on the table. Go back for more protein/veg before more carbs if still hungry.</div>
+      <div class="note-card"><b>Wheat can hide in shared dishes</b> — watch for: bread served alongside the meal, thickened stews or gravies (wheat flour is a common thickener), battered or breaded meats, and pasta-based sides. When unsure, ask or stick to the plainly grilled/roasted items and rice.</div>
+
+      <h2 class="section-h">Wheat-free carbs</h2>
+      <div class="food-tags">
+        <span class="food-tag">Rice</span>
+        <span class="food-tag">Potatoes</span>
+        <span class="food-tag">Sweet potato</span>
+        <span class="food-tag">Quinoa</span>
+        <span class="food-tag">Corn</span>
+        <span class="food-tag">GF oats</span>
+        <span class="food-tag">Lentils</span>
+        <span class="food-tag">Chickpeas</span>
+      </div>
+
+      <h2 class="section-h">Cutting the soda</h2>
+      <div id="taperList"></div>
+    </section>
+
+    <!-- BEST PRACTICES -->
+    <section id="view-habits">
+      <h2 class="section-h" style="margin-top:6px;">Water</h2>
+      <p class="section-p">~3.5–4 litres/day baseline for your bodyweight — more on training days or hot days. Spread it through the day.</p>
+      <div class="tracker-card">
+        <div class="tracker-num"><span id="waterVal">0</span><small> ml today</small></div>
+        <div class="tracker-goal">Goal: ~3,700 ml</div>
+        <div class="tracker-btns">
+          <button onclick="addWater(250)">+250ml</button>
+          <button onclick="addWater(500)">+500ml</button>
+          <button class="ghost" onclick="resetWater()">Reset</button>
+        </div>
+      </div>
+
+      <h2 class="section-h">Daily steps</h2>
+      <p class="section-p">You're starting from near-zero movement — ramp up gradually rather than jumping straight to 10k.</p>
+      <div id="stepList"></div>
+
+      <h2 class="section-h">Meal timing around workouts</h2>
+      <div class="note-card"><b>Before</b> — a balanced meal 1.5–2 hrs pre-training. Training soon after waking? Keep it light: a banana or a couple of eggs.</div>
+      <div class="note-card"><b>After</b> — eat your next meal within 1–2 hrs. Don't train on a completely empty stomach at this training frequency.</div>
+
+      <h2 class="section-h">Sleep &amp; recovery</h2>
+      <div class="note-card"><b>Sleep</b> — you're already at 8+ hrs. Keep it exactly as is, and try to keep the same sleep/wake time daily.</div>
+      <div class="note-card"><b>Rest day</b> — Day 7 is a full rest day. Respect it, don't fill it with extra training.</div>
+      <div class="note-card"><b>Sauna &amp; jacuzzi</b> — great for recovery, not for fat loss. Sweat lost there is water, back within hours.</div>
+
+      <h2 class="section-h">Warm-up &amp; injury prevention</h2>
+      <div class="note-card"><b>Weeks 1–2</b> — technique only. Light weight, perfect form. Add load from week 3 onward.</div>
+      <div class="note-card"><b>Muscle soreness (DOMS)</b> — going from zero activity to 6 days/week, expect real soreness in weeks 1–2. That's normal muscle adaptation, not injury, and it fades by week 3. Joint pain is different — stop a set immediately if you feel that.</div>
+      <div class="note-card"><b>Pain vs. burn</b> — muscle burn during a set is normal. Joint pain is not — stop the set if you feel it.</div>
+      <div class="note-card"><b>Progression</b> — small weight/rep increases every 1–2 weeks. Never a sudden jump.</div>
+      <div class="note-card"><b>Deload every 4–6 weeks</b> — take one lighter week: same exercises, but cut sets by about a third and drop the weight ~20–30%. This isn't a rest week, just a lighter one — it lets your body catch up on recovery before you keep progressing, and helps you avoid plateaus and burnout from 6 straight training days.</div>
+
+      <h2 class="section-h">Looking ahead</h2>
+      <div class="note-card"><b>Ramadan (expected ~Feb 8, 2027)</b> — fasting will change your training and meal timing completely. This plan assumes normal eating hours for now. As it gets closer, come back and we'll rebuild the training/meal schedule around your actual fasting window and phase at that time.</div>
+
+      <h2 class="section-h">Weekly check-in</h2>
+      <div class="tracker-card">
+        <div class="weight-input-row">
+          <input type="number" inputmode="decimal" id="weightInput" placeholder="Weight (kg)" step="0.1" aria-label="Weight in kilograms">
+          <input type="number" inputmode="decimal" id="waistInput" placeholder="Waist (cm)" step="0.5" aria-label="Waist in centimeters">
+          <button onclick="logWeight()">Log</button>
+        </div>
+        <div id="weightLog"></div>
+        <div class="tracker-hint">Same conditions each time: morning, after the bathroom, before food. Waist matters as much as the scale for what you're after — track both.</div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <div class="tabbar-inner">
+      <button class="tab-btn active" data-tab="view-workouts">
+        <svg class="tab-ic" viewBox="0 0 100 100"><use href="#ic-dumbbell"/></svg>
+        Workouts
+      </button>
+      <button class="tab-btn" data-tab="view-diet">
+        <svg class="tab-ic" viewBox="0 0 100 100"><use href="#ic-meal"/></svg>
+        Diet
+      </button>
+      <button class="tab-btn" data-tab="view-habits">
+        <svg class="tab-ic" viewBox="0 0 100 100"><use href="#ic-guide"/></svg>
+        Habits
+      </button>
+    </div>
+  </nav>
+</div>
+
+<script>
+/* ---------- exercise instruction library ---------- */
+const EX = {
+  warmup: {name:"Warm-up", icon:"ic-cardio", equip:"Bodyweight, no equipment", log:"none", detail:{setup:"5-8 minutes before any lifting day.", execution:"Arm circles (20s each direction), leg swings (10 each leg, each direction), 15 bodyweight squats, band pull-aparts if available (15 reps).", breathing:"Relaxed, natural breathing.", mistake:"Skipping this because it feels unnecessary — it's the single biggest injury-prevention lever you have as a beginner."}},
+  legpress: {name:"Leg Press", icon:"ic-legpress", equip:"Leg press machine", log:"weight", detail:{setup:"Sit in the machine, feet shoulder-width on the platform, mid-foot position, back flat against the pad.", execution:"Lower the platform until knees reach about 90°, then press through your heels back to start. Don't lock knees fully at the top.", breathing:"Inhale on the way down, exhale as you press up.", mistake:"Letting knees cave inward — keep them tracking over your toes."}},
+  chestpress: {name:"Chest Press", icon:"ic-chestpress", equip:"Chest press machine", log:"weight", detail:{setup:"Adjust seat so the handles sit at mid-chest height.", execution:"Press forward until arms extend (not locked), return slowly to start.", breathing:"Exhale on the push, inhale on the return.", mistake:"Flaring elbows straight out to the sides — keep them at roughly 45° from your torso."}},
+  pushup: {name:"Push-Up", icon:"ic-pushup", equip:"Bodyweight (bench optional, for incline)", log:"reps", detail:{setup:"Hands slightly wider than shoulders, body in a straight line head to heels. Use an incline (bench) if a full push-up is too hard yet.", execution:"Lower your chest toward the floor, elbows at ~45°, push back to full extension.", breathing:"Inhale down, exhale up.", mistake:"Letting the hips sag — brace your core so your body stays one straight line."}},
+  latpulldown: {name:"Lat Pulldown", icon:"ic-latpulldown", equip:"Lat pulldown machine", log:"weight", detail:{setup:"Grip the bar wider than shoulder-width, thighs secured under the pad.", execution:"Pull the bar down to your upper chest, leading with your elbows, control it back up.", breathing:"Exhale as you pull down, inhale on the return.", mistake:"Leaning back too far and using momentum instead of your back muscles."}},
+  facepull: {name:"Face Pull", icon:"ic-facepull", equip:"Cable machine + rope attachment", log:"weight", detail:{setup:"Cable at upper-chest to head height, rope attachment, step back for tension.", execution:"Pull the rope toward your face, elbows flaring wide, squeeze shoulder blades together.", breathing:"Exhale as you pull, inhale on release.", mistake:"Using too much weight and turning it into a row instead of a pull to face height."}},
+  shoulderpress: {name:"Shoulder Press", icon:"ic-shoulderpress", equip:"Shoulder press machine", log:"weight", detail:{setup:"Machine seat adjusted so handles start at shoulder height.", execution:"Press straight up until arms extend, lower back with control.", breathing:"Exhale on the press up, inhale on the way down.", mistake:"Arching your lower back to help push the weight — keep your back flat on the pad."}},
+  plank: {name:"Plank", icon:"ic-plank", equip:"Bodyweight, no equipment", log:"reps", detail:{setup:"Forearms on the floor, elbows under shoulders, legs extended, toes down.", execution:"Hold a straight line from head to heels for the target time.", breathing:"Steady, normal breathing — don't hold your breath.", mistake:"Letting hips sag or pike up — think 'straight board', not a V or a U."}},
+  cardio_mod: {name:"Moderate cardio", icon:"ic-cardio", equip:"Treadmill, bike, or elliptical", log:"none", detail:{setup:"Treadmill, bike, or elliptical — whichever is comfortable on your joints today.", execution:"Keep a pace where you could still hold a conversation.", breathing:"Steady, not gasping.", mistake:"Going too hard too soon — this session should be repeatable, not a sprint."}},
+  deadbug: {name:"Dead Bug", icon:"ic-deadbug", equip:"Bodyweight, no equipment", log:"reps", detail:{setup:"Lie on your back, arms reaching up, knees bent 90° above your hips.", execution:"Lower one arm and the opposite leg toward the floor without your lower back lifting, return, alternate.", breathing:"Exhale as you extend the limbs.", mistake:"Letting your lower back arch off the floor — keep it pressed down throughout."}},
+  bicyclecrunch: {name:"Bicycle Crunch", icon:"ic-bicyclecrunch", equip:"Bodyweight, no equipment", log:"reps", detail:{setup:"Lie on your back, hands lightly behind your head, knees bent.", execution:"Bring opposite elbow to opposite knee in a pedaling motion.", breathing:"Exhale on each crunch.", mistake:"Pulling on your neck — let your abs do the work, hands just support your head."}},
+  rdl: {name:"Romanian Deadlift", icon:"ic-hinge", equip:"Dumbbells or barbell", log:"weight", detail:{setup:"Stand feet hip-width, dumbbells or barbell in front of your thighs.", execution:"Push hips back with a slight knee bend, lower the weight along your legs until you feel a hamstring stretch, drive hips forward to stand.", breathing:"Inhale on the way down, exhale as you stand.", mistake:"Rounding the lower back — keep your chest up and back flat throughout."}},
+  inclinepress: {name:"Incline Press", icon:"ic-inclinepress", equip:"Incline bench + dumbbells or barbell", log:"weight", detail:{setup:"Bench at a slight incline (~30°), dumbbells or barbell at chest height.", execution:"Press up and slightly back until arms extend, lower with control.", breathing:"Exhale on the press, inhale on the way down.", mistake:"Setting the incline too steep — that turns it into a shoulder press instead."}},
+  chestfly: {name:"Chest Fly", icon:"ic-fly", equip:"Cable machine or dumbbells", log:"weight", detail:{setup:"Cable handles or dumbbells at chest height, slight bend in the elbows.", execution:"Bring hands together in front of your chest in a wide arc, return slowly.", breathing:"Exhale as hands come together, inhale on the way out.", mistake:"Bending the elbows too much — that turns it into a press. Keep the arc wide."}},
+  cablerow: {name:"Cable Row", icon:"ic-cablerow", equip:"Cable row machine", log:"weight", detail:{setup:"Sit with feet on the platform, knees slightly bent, grab the handle.", execution:"Pull the handle to your torso, squeeze shoulder blades together, extend arms back out.", breathing:"Exhale as you pull, inhale on the return.", mistake:"Rounding your back to get more pull — keep your torso upright and stable."}},
+  lateralraise: {name:"Lateral Raise", icon:"ic-lateralraise", equip:"Light dumbbells", log:"weight", detail:{setup:"Stand holding light dumbbells at your sides.", execution:"Raise arms out to the sides to roughly shoulder height, lower with control.", breathing:"Exhale as you raise, inhale on the way down.", mistake:"Swinging the weight up with momentum — go lighter and control it."}},
+  sideplank: {name:"Side Plank", icon:"ic-sideplank", equip:"Bodyweight, no equipment", log:"reps", detail:{setup:"Lie on your side, forearm under your shoulder, legs stacked.", execution:"Lift your hips until your body forms a straight line, hold.", breathing:"Steady, normal breathing.", mistake:"Letting the hips drop toward the floor — keep them lifted the whole hold."}},
+  twist: {name:"Cable Woodchop / Russian Twist", icon:"ic-twist", equip:"Cable machine or a light weight", log:"weight", detail:{setup:"Cable at chest height (or hold a light weight for Russian Twist), feet shoulder-width.", execution:"Rotate your torso to pull the cable/weight diagonally across your body, controlled, then return.", breathing:"Exhale on the rotation.", mistake:"Moving fast on momentum instead of a controlled rotation — slow it down."}},
+  walkswim: {name:"Walk or swim", icon:"ic-swim", equip:"Treadmill/outdoors, or the pool", log:"none", detail:{setup:"Comfortable shoes or swimwear, easy environment.", execution:"Keep the effort genuinely easy — this is recovery, not training.", breathing:"Relaxed, natural.", mistake:"Turning 'easy recovery' into another hard session — resist pushing the pace."}},
+  stretch: {name:"Stretch / mobility", icon:"ic-stretch", equip:"Mat, no equipment", log:"none", detail:{setup:"Mat or open floor space.", execution:"Hold each major stretch (hamstrings, quads, chest, shoulders, back) for 20-30 seconds.", breathing:"Slow, deep breaths into each stretch.", mistake:"Bouncing in the stretch — hold it still instead."}},
+  hipflexor: {name:"Hip Flexor Stretch", icon:"ic-stretch", equip:"Mat, no equipment", log:"none", detail:{setup:"Kneel on one knee (back knee down), front foot flat on the floor, front knee bent at 90°.", execution:"Gently push your hips forward until you feel a stretch at the front of the back hip, keep your torso upright.", breathing:"Slow, deep breaths, hold 20-30 seconds each side.", mistake:"Arching your lower back to fake the range — push from the hips, not the spine. This one matters for you specifically since sitting all day tightens the hip flexors, which shows up as lower-back rounding in your Romanian Deadlift."}},
+  stepup: {name:"Step-Up / Leg Extension", icon:"ic-stepup", equip:"Bench/box, or leg extension machine", log:"weight", detail:{setup:"A sturdy bench/box, or the leg extension machine adjusted to your leg length.", execution:"Step up fully onto the platform, or extend legs fully on the machine, lower with control.", breathing:"Exhale on the effort, inhale on the return.", mistake:"Pushing off the back leg on step-ups instead of driving through the front leg."}},
+  dbpress: {name:"Dumbbell Press", icon:"ic-dbpress", equip:"Flat bench + dumbbells", log:"weight", detail:{setup:"Lie on a flat bench, dumbbells at chest height.", execution:"Press up until arms extend, lower with control back to chest level.", breathing:"Exhale on the press, inhale on the way down.", mistake:"Letting the dumbbells drift forward or back — keep them stacked over your chest."}},
+  singlearmrow: {name:"Single-Arm Row", icon:"ic-singlearmrow", equip:"Bench + dumbbell", log:"weight", detail:{setup:"One knee and hand on a bench, opposite foot on the floor, dumbbell in the free hand.", execution:"Pull the dumbbell to your hip, squeezing your back, lower with control.", breathing:"Exhale as you pull, inhale on the way down.", mistake:"Twisting your torso to help lift — keep your body square to the bench."}},
+  frontraise: {name:"Front Raise", icon:"ic-frontraise", equip:"Light dumbbells", log:"weight", detail:{setup:"Stand holding light dumbbells in front of your thighs.", execution:"Raise arms straight out in front to shoulder height, lower with control.", breathing:"Exhale as you raise, inhale on the way down.", mistake:"Swinging the weight using your back — keep it slow and controlled."}},
+  cardio_long: {name:"Mixed cardio", icon:"ic-cardio", equip:"Treadmill, bike, or pool", log:"none", detail:{setup:"Treadmill, bike, or pool.", execution:"Mix modes if you like — steady effort throughout, conversational pace.", breathing:"Steady, controlled.", mistake:"Front-loading all the effort in the first 10 minutes then fading — pace yourself."}},
+  rest: {name:"Full rest", icon:"ic-rest", equip:"—", log:"none", detail:{setup:"No gym today.", execution:"Let the body recover. Optional easy walk if you feel like moving.", breathing:"—", mistake:"Filling a rest day with extra training — recovery is part of the program, not a skip."}},
+};
+
+const DAYS = [
+  { label:"Full Body A", type:"strength", warmup:true, list:[
+    {k:"legpress", sets:"3 × 10–12"},{k:"chestpress", sets:"3 × 10–12"},{k:"pushup", sets:"2 × 8–12"},
+    {k:"latpulldown", sets:"3 × 10–12"},{k:"facepull", sets:"2 × 12–15"},{k:"shoulderpress", sets:"2 × 10–12"},
+    {k:"plank", sets:"3 × 30–45s"},
+  ]},
+  { label:"Cardio + Core", type:"cardio", list:[
+    {k:"cardio_mod", sets:"25–35 min"},{k:"deadbug", sets:"3 × 12–15"},{k:"bicyclecrunch", sets:"3 × 15–20"},
+  ]},
+  { label:"Full Body B", type:"strength", warmup:true, list:[
+    {k:"rdl", sets:"3 × 10–12"},{k:"inclinepress", sets:"3 × 10–12"},{k:"chestfly", sets:"2 × 12–15"},
+    {k:"cablerow", sets:"3 × 10–12"},{k:"lateralraise", sets:"2 × 12–15"},
+    {k:"sideplank", sets:"2 × 30–40s /side"},{k:"twist", sets:"2 × 12–15"},
+  ]},
+  { label:"Active Recovery", type:"cardio", list:[
+    {k:"walkswim", sets:"30–45 min"},{k:"hipflexor", sets:"2 × 20–30s /side"},{k:"stretch", sets:"10 min"},
+  ]},
+  { label:"Full Body C", type:"strength", warmup:true, list:[
+    {k:"stepup", sets:"3 × 10–12"},{k:"dbpress", sets:"3 × 10–12"},{k:"singlearmrow", sets:"3 × 10–12 /side"},
+    {k:"facepull", sets:"2 × 12–15"},{k:"frontraise", sets:"2 × 12–15"},
+  ]},
+  { label:"Longer Cardio", type:"cardio", list:[
+    {k:"cardio_long", sets:"40–50 min"},
+  ]},
+  { label:"Rest", type:"rest", list:[
+    {k:"rest", sets:"—"},
+  ]},
+];
+
+const MEALDAYS = [
+  {breakfast:"4 whole eggs, scrambled + 60g dry GF oats (cooked) + 1 medium banana", lunch:"200g grilled chicken breast + 180g cooked rice + mixed salad, 1 tbsp olive oil", snack:"250g plain Greek yogurt + 20g almonds", dinner:"200g grilled fish + 220g roasted potato + steamed vegetables"},
+  {breakfast:"3 boiled eggs + 150g cooked quinoa + a handful of berries or fruit", lunch:"200g grilled lean beef + 180g cooked rice + side salad", snack:"1 can tuna (in water) + 2-3 GF rice cakes", dinner:"200g grilled chicken + 200g sweet potato + steamed vegetables"},
+  {breakfast:"3-egg vegetable omelette (peppers, onion, spinach) + 150g cooked rice", lunch:"200g grilled fish + 150g cooked quinoa + side salad, 1 tbsp olive oil", snack:"250g plain Greek yogurt + 1 medium banana", dinner:"200g grilled beef + 220g roasted potato + steamed vegetables"},
+  {breakfast:"4 whole eggs + 60g dry GF oats (cooked) + 1 piece of fruit", lunch:"200g grilled chicken (shawarma-style, no bread) + 180g cooked rice + salad", snack:"20-25g mixed nuts + 1 apple", dinner:"200g grilled fish + 180g cooked rice + steamed vegetables"},
+  {breakfast:"3 whole eggs, scrambled + 150g cooked corn + 1 piece of fruit", lunch:"200g grilled chicken + 180g cooked lentils + side salad", snack:"1 can tuna (in water) + mixed vegetables", dinner:"200g grilled beef + 200g sweet potato + steamed vegetables"},
+  {breakfast:"3 boiled eggs + 150g cooked quinoa + 1 piece of fruit", lunch:"200g grilled fish + 180g cooked rice + side salad, 1 tbsp olive oil", snack:"250g plain Greek yogurt + 20g almonds", dinner:"200g grilled chicken + 220g roasted potato + steamed vegetables"},
+  {breakfast:"60g dry GF oats (cooked) + 3 whole eggs + 1 medium banana", lunch:"200g mixed grill (chicken/beef) + 180g cooked rice + salad", snack:"150g cooked chickpeas + 1 can tuna (in water)", dinner:"200g grilled fish + 200g sweet potato + steamed vegetables"},
+  {breakfast:"4 whole eggs + 150g cooked rice + 1 piece of fruit", lunch:"200g grilled chicken + 150g cooked quinoa + side salad, 1 tbsp olive oil", snack:"250g plain Greek yogurt + 1 piece of fruit", dinner:"200g grilled beef + 220g roasted potato + steamed vegetables"},
+];
+
+const TAPER = [
+  {week:"Weeks 1–2", detail:"Cut to 1 soda/day. Swap the second for sparkling water or a zero-sugar option."},
+  {week:"Weeks 3–4", detail:"Down to 3–4 times a week."},
+  {week:"After", detail:"Occasional treat, not a daily habit."},
+];
+
+const STEPS = [
+  {week:"Weeks 1–2", detail:"4,000–5,000 steps/day"},
+  {week:"Weeks 3–4", detail:"~6,000 steps/day"},
+  {week:"Weeks 5–6", detail:"~7,000–8,000 steps/day"},
+  {week:"Week 7+", detail:"8,000–10,000 steps/day"},
+];
+
+/* ---------- state ---------- */
+let checked = {};
+let openCards = new Set();
+let setLogs = {};
+let waterTotal = 0;
+let weightEntries = [];
+
+function illustrationSVG(icon){
+  return `<svg viewBox="0 0 100 100"><use href="#${icon}"/></svg>`;
+}
+
+function renderDayStrip(activeIdx){
+  const strip = document.getElementById('dayStrip');
+  strip.innerHTML = DAYS.map((d,i)=>`
+    <button type="button" class="day-chip ${i===activeIdx?'active':''}" data-day="${i}" aria-pressed="${i===activeIdx}">
+      Day ${i+1}<small>${d.type==='strength'?'Lift':d.type==='cardio'?'Cardio':'Rest'}</small>
+    </button>`).join('');
+  strip.querySelectorAll('.day-chip').forEach(el=>{
+    el.addEventListener('click',()=>showDay(parseInt(el.dataset.day)));
+  });
+}
+
+let currentDay = 0;
+function showDay(idx){
+  currentDay = idx;
+  const d = DAYS[idx];
+  document.getElementById('dayTitle').textContent = `Day ${idx+1} — ${d.label}`;
+  document.getElementById('daySub').textContent =
+    d.type==='strength' ? 'Full gym, moderate weight, focus on form.' :
+    d.type==='cardio' ? 'Keep it steady — this should feel sustainable.' :
+    'Recovery day.';
+  renderExerciseList();
+  renderDayStrip(idx);
+}
+
+function renderExerciseList(){
+  const d = DAYS[currentDay];
+  let html = '';
+  if(d.warmup){
+    const w = EX.warmup;
+    html += `<div class="warmup-card"><b>Warm-up — 5-8 min</b><ul>
+      <li>Arm circles, 20s each direction</li>
+      <li>Leg swings, 10 each leg, each direction</li>
+      <li>Bodyweight squats × 15</li>
+      <li>Band pull-aparts × 15 (if available)</li>
+    </ul></div>`;
+  }
+  d.list.forEach((item,i)=>{
+    const ex = EX[item.k];
+    const id = `d${currentDay}-e${i}`;
+    const isDone = !!checked[id];
+    const isOpen = openCards.has(id);
+    const logs = setLogs[id] || [];
+    html += `
+    <div class="ex-card ${isOpen?'open':''}" id="card-${id}">
+      <div class="ex-head" onclick="toggleExpand('${id}')">
+        <button class="ex-check ${isDone?'done':''}" onclick="event.stopPropagation();toggleCheck('${id}')">${isDone?'✓':''}</button>
+        <div class="ex-icon">${illustrationSVG(ex.icon)}</div>
+        <div class="ex-body">
+          <p class="ex-name ${isDone?'done-text':''}">${ex.name}</p>
+          <p class="ex-meta">${item.sets} · ${ex.equip}${logs.length?' · '+logs.length+' logged':''}</p>
+        </div>
+        <div class="ex-chevron">›</div>
+      </div>
+      <div class="ex-detail">
+        <div class="ex-detail-inner">
+          <div class="ex-illustration">${illustrationSVG(ex.icon)}</div>
+          <p class="ex-step"><b>EQUIPMENT</b>${ex.equip}</p>
+          <p class="ex-step"><b>SETUP</b>${ex.detail.setup}</p>
+          <p class="ex-step"><b>EXECUTION</b>${ex.detail.execution}</p>
+          <p class="ex-step"><b>BREATHING</b>${ex.detail.breathing}</p>
+          <div class="ex-mistake"><b>Common mistake:</b> ${ex.detail.mistake}</div>
+          ${renderLogBox(id, ex, logs)}
+          ${ex.equip!=="—" ? `<a class="demo-link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name+' proper form gym')}" target="_blank" rel="noopener">▶ Watch a real demo</a>` : ''}
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('exerciseList').innerHTML = html;
+  updateProgress();
+}
+
+function renderLogBox(id, ex, logs){
+  if(ex.log === 'none') return '';
+  const weightInput = ex.log === 'weight' ? `<input type="number" inputmode="decimal" placeholder="kg" class="log-input" id="w-${id}" aria-label="Weight used, kg">` : '';
+  const entries = logs.map((s,idx)=>`
+    <div class="log-entry"><span>Set ${idx+1}: ${s.weight!=null ? s.weight+'kg × '+s.reps : s.reps+' reps/sec'}</span><span class="log-remove" onclick="removeSet('${id}',${idx})">✕</span></div>`).join('');
+  return `
+    <div class="log-box">
+      <div class="log-title">Log your sets</div>
+      <div class="log-inputs">
+        ${weightInput}
+        <input type="number" inputmode="numeric" placeholder="${ex.log==='weight'?'reps':'reps / sec'}" class="log-input" id="r-${id}" aria-label="Reps completed">
+        <button onclick="addSet('${id}')">+ Add</button>
+      </div>
+      ${entries ? `<div class="log-entries">${entries}</div>` : ''}
+    </div>`;
+}
+
+function addSet(id){
+  const wInput = document.getElementById('w-'+id);
+  const rInput = document.getElementById('r-'+id);
+  const weight = wInput ? parseFloat(wInput.value) : null;
+  const reps = rInput ? parseFloat(rInput.value) : null;
+  if(reps === null || isNaN(reps) || reps <= 0) return;
+  if(!setLogs[id]) setLogs[id] = [];
+  setLogs[id].push({weight: (weight!=null && !isNaN(weight)) ? weight : null, reps});
+  renderExerciseList();
+}
+function removeSet(id, idx){
+  const s = setLogs[id][idx];
+  const label = s.weight!=null ? `${s.weight}kg × ${s.reps}` : `${s.reps} reps/sec`;
+  if(!confirm(`Delete this set (${label})?`)) return;
+  setLogs[id].splice(idx,1);
+  renderExerciseList();
+}
+
+function toggleExpand(id){
+  const card = document.getElementById('card-'+id);
+  card.classList.toggle('open');
+  if(card.classList.contains('open')) openCards.add(id); else openCards.delete(id);
+}
+function toggleCheck(id){
+  checked[id] = !checked[id];
+  renderExerciseList();
+}
+function updateProgress(){
+  const d = DAYS[currentDay];
+  const total = d.list.length;
+  let done = 0;
+  d.list.forEach((item,i)=>{ if(checked[`d${currentDay}-e${i}`]) done++; });
+  document.getElementById('dayProgress').textContent = `${done}/${total} complete`;
+}
+
+function renderMealStrip(activeIdx){
+  const strip = document.getElementById('mealStrip');
+  strip.innerHTML = MEALDAYS.map((m,i)=>`
+    <button type="button" class="day-chip diet-chip ${i===activeIdx?'active':''}" data-meal="${i}" aria-pressed="${i===activeIdx}">Day ${i+1}</button>`).join('');
+  strip.querySelectorAll('.diet-chip').forEach(el=>{
+    el.addEventListener('click',()=>showMealDay(parseInt(el.dataset.meal)));
+  });
+}
+function showMealDay(idx){
+  const m = MEALDAYS[idx];
+  document.getElementById('mealList').innerHTML = `
+    <div class="meal"><div class="meal-row"><span class="meal-name">Breakfast</span><span class="meal-desc">${m.breakfast}</span></div></div>
+    <div class="meal"><div class="meal-row"><span class="meal-name">Lunch</span><span class="meal-desc">${m.lunch}</span></div></div>
+    <div class="meal"><div class="meal-row"><span class="meal-name">Snack</span><span class="meal-desc">${m.snack}</span></div></div>
+    <div class="meal"><div class="meal-row"><span class="meal-name">Dinner</span><span class="meal-desc">${m.dinner}</span></div></div>`;
+  renderMealStrip(idx);
+}
+
+function renderTaper(){
+  document.getElementById('taperList').innerHTML = TAPER.map(t=>`
+    <div class="taper-row"><span class="taper-week">${t.week}</span><span>${t.detail}</span></div>`).join('');
+}
+function renderSteps(){
+  document.getElementById('stepList').innerHTML = STEPS.map(s=>`
+    <div class="taper-row"><span class="taper-week">${s.week}</span><span>${s.detail}</span></div>`).join('');
+}
+
+function addWater(n){
+  waterTotal += n;
+  document.getElementById('waterVal').textContent = waterTotal;
+}
+function resetWater(){
+  waterTotal = 0;
+  document.getElementById('waterVal').textContent = waterTotal;
+}
+
+function logWeight(){
+  const wInput = document.getElementById('weightInput');
+  const waistInput = document.getElementById('waistInput');
+  const w = parseFloat(wInput.value);
+  const waist = parseFloat(waistInput.value);
+  if(!w && !waist) return;
+  weightEntries.push({weight: isNaN(w)?null:w, waist: isNaN(waist)?null:waist});
+  wInput.value = '';
+  waistInput.value = '';
+  renderWeightLog();
+}
+function renderWeightLog(){
+  const box = document.getElementById('weightLog');
+  if(weightEntries.length === 0){ box.innerHTML = ''; return; }
+  let html = '';
+  for(let i = weightEntries.length - 1; i >= 0; i--){
+    const e = weightEntries[i];
+    let parts = [];
+    if(e.weight!=null) parts.push(e.weight+'kg');
+    if(e.waist!=null) parts.push(e.waist+'cm waist');
+    let trendHtml = '';
+    if(i > 0){
+      const prev = weightEntries[i-1];
+      if(e.weight!=null && prev.weight!=null){
+        const d = e.weight - prev.weight;
+        if(d < 0) trendHtml += `<span class="trend down">↓ ${Math.abs(d).toFixed(1)}kg</span>`;
+        else if(d > 0) trendHtml += `<span class="trend up">↑ ${d.toFixed(1)}kg</span>`;
+      }
+      if(e.waist!=null && prev.waist!=null){
+        const dw = e.waist - prev.waist;
+        if(dw < 0) trendHtml += `<span class="trend down">↓ ${Math.abs(dw).toFixed(1)}cm</span>`;
+        else if(dw > 0) trendHtml += `<span class="trend up">↑ ${dw.toFixed(1)}cm</span>`;
+      }
+    }
+    html += `<div class="weight-entry"><span>Check-in ${i+1} — ${parts.join(' · ')}</span>${trendHtml}</div>`;
+  }
+  box.innerHTML = html;
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('main > section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+showDay(0);
+showMealDay(0);
+renderTaper();
+renderSteps();
+</script>
+</body>
+</html>
