@@ -1,0 +1,2289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#10131c">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Phase 1 — Your Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#10131c;
+    --panel:#1a2030;
+    --panel-2:#1f2636;
+    --panel-border:#262d40;
+    --accent:#c99a3b;
+    --accent-2:#7c9473;
+    --text:#ede7da;
+    --text-muted:#8890a0;
+    --font-display:'Oswald',sans-serif;
+    --font-body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    display:flex;
+    justify-content:center;
+  }
+  #app{
+    width:100%;
+    max-width:480px;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+
+  header{
+    padding:calc(env(safe-area-inset-top) + 18px) 20px 14px;
+    animation:fadeDown .5s ease both;
+  }
+  @keyframes fadeDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+  .badge{
+    display:inline-block;
+    font-size:12.5px;
+    letter-spacing:.02em;
+    color:var(--accent);
+    background:rgba(201,154,59,.12);
+    border:1px solid rgba(201,154,59,.35);
+    padding:4px 10px;
+    border-radius:100px;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:26px;
+    margin:0;
+    line-height:1.15;
+  }
+
+  main{
+    flex:1;
+    overflow-y:auto;
+    padding:4px 20px 116px;
+    -webkit-overflow-scrolling:touch;
+  }
+  section{display:none;}
+  section.active{display:block;}
+
+  .day-strip{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:6px 2px 16px;
+    margin-bottom:6px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .day-strip::-webkit-scrollbar{display:none;}
+  .day-chip{
+    flex:0 0 auto;
+    font-family:var(--font-display);
+    font-size:14px;
+    font-weight:500;
+    color:var(--text-muted);
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    padding:9px 14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    line-height:1.2;
+    min-width:56px;
+    cursor:pointer;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  .day-chip small{font-family:var(--font-body);font-size:11px;font-weight:400;color:var(--text-muted);margin-top:2px;}
+  .day-chip.active{color:#161822;background:var(--accent);border-color:var(--accent);}
+  .day-chip.active small{color:#161822;opacity:.75;}
+  .day-chip.diet-chip.active{background:var(--accent-2);border-color:var(--accent-2);}
+
+  .day-title{font-family:var(--font-display);font-size:20px;font-weight:600;margin:4px 0 2px;}
+  .day-sub{color:var(--text-muted);font-size:14px;margin:0 0 4px;}
+  .progress-line{font-size:13px;color:var(--accent);margin:0 0 14px;font-weight:600;}
+
+  /* Exercise card */
+  .ex-card{
+    border-left:3px solid var(--accent);
+    background:var(--panel);
+    border-radius:6px;
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  .ex-head{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    padding:13px 12px 13px 14px;
+    cursor:pointer;
+  }
+  .ex-check{
+    flex:0 0 auto;
+    width:22px;height:22px;
+    border-radius:6px;
+    border:2px solid var(--panel-border);
+    background:transparent;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--bg);
+    font-size:14px;
+    font-weight:700;
+  }
+  .ex-check.done{background:var(--accent);border-color:var(--accent);}
+  .ex-icon{flex:0 0 auto;width:38px;height:38px;color:var(--accent);}
+  .ex-icon svg{width:100%;height:100%;}
+  .ex-body{flex:1;min-width:0;}
+  .ex-name{font-weight:600;font-size:15px;margin:0;}
+  .ex-name.done-text{color:var(--text-muted);text-decoration:line-through;}
+  .ex-meta{font-size:13px;color:var(--text-muted);margin:1px 0 0;}
+  .ex-chevron{flex:0 0 auto;color:var(--text-muted);font-size:13px;transition:transform .2s ease;}
+  .ex-card.open .ex-chevron{transform:rotate(90deg);}
+
+  .ex-detail{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .ex-card.open .ex-detail{max-height:900px;}
+  .ex-detail-inner{padding:2px 16px 18px;border-top:1px solid var(--panel-border);}
+  .ex-illustration{width:100%;height:190px;color:var(--accent);margin:14px 0 12px;background:rgba(255,255,255,.03);border-radius:8px;}
+  .ex-illustration svg{width:100%;height:100%;}
+  .ex-step{margin:0 0 10px;font-size:13.5px;line-height:1.5;}
+  .ex-step b{color:var(--accent);display:block;font-size:11.5px;letter-spacing:.03em;margin-bottom:2px;}
+  .ex-mistake{
+    background:rgba(201,154,59,.1);
+    border:1px solid rgba(201,154,59,.3);
+    border-radius:8px;
+    padding:10px 12px;
+    font-size:13px;
+    margin-top:8px;
+  }
+  .ex-mistake b{color:var(--accent);}
+  .demo-link{
+    display:block;text-align:center;
+    margin-top:12px;
+    padding:11px 0;
+    border-radius:8px;
+    background:rgba(201,154,59,.14);
+    border:1px solid rgba(201,154,59,.4);
+    color:var(--accent);
+    font-weight:600;font-size:13.5px;
+    text-decoration:none;
+  }
+  .log-box{background:var(--panel-2);border:1px solid var(--panel-border);border-radius:8px;padding:12px;margin-top:12px;}
+  .log-title{font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:600;}
+  .log-inputs{display:flex;gap:8px;}
+  .log-input{
+    flex:1;min-width:0;background:var(--panel);border:1px solid var(--panel-border);
+    border-radius:6px;color:var(--text);font-size:14px;padding:8px 10px;font-family:var(--font-body);
+  }
+  .log-inputs button{all:unset;background:var(--accent);color:#161822;font-weight:600;font-size:13px;padding:0 14px;border-radius:6px;cursor:pointer;display:flex;align-items:center;white-space:nowrap;}
+  .log-entries{margin-top:10px;}
+  .log-entry{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-top:1px solid var(--panel-border);}
+  .log-remove{color:var(--text-muted);cursor:pointer;padding:0 4px;}
+
+  .warmup-card{
+    background:rgba(124,148,115,.1);
+    border:1px solid rgba(124,148,115,.3);
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:14px;
+    font-size:13.5px;
+  }
+  .warmup-card b{color:var(--accent-2);display:block;margin-bottom:6px;font-size:14px;}
+  .warmup-card ul{margin:0;padding-left:18px;}
+  .warmup-card li{margin-bottom:3px;}
+
+  .note-card{
+    background:rgba(124,148,115,.1);
+    border:1px solid rgba(124,148,115,.3);
+    border-radius:8px;
+    padding:14px 16px;
+    font-size:14px;
+    color:var(--text);
+    margin-top:6px;
+    margin-bottom:10px;
+  }
+  .note-card b{color:var(--accent-2);}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0 20px;}
+  .stat{background:var(--panel);border:1px solid var(--panel-border);border-radius:8px;padding:12px 6px;text-align:center;}
+  .stat .num{font-family:var(--font-display);font-size:19px;color:var(--accent-2);display:block;}
+  .stat .lbl{font-size:12px;color:var(--text-muted);}
+
+  h2.section-h{font-family:var(--font-display);font-size:17px;font-weight:600;margin:26px 0 10px;color:var(--text);}
+  h2.section-h:first-of-type{margin-top:6px;}
+  p.section-p{font-size:13.5px;color:var(--text-muted);margin:-4px 0 12px;line-height:1.5;}
+
+  .food-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+  .food-tag{font-size:13px;padding:6px 12px;border-radius:100px;background:rgba(124,148,115,.12);border:1px solid rgba(124,148,115,.3);color:var(--text);}
+
+  .meal{border-bottom:1px solid var(--panel-border);}
+  .meal:last-child{border-bottom:none;}
+  .meal-row{display:flex;justify-content:space-between;gap:10px;padding:12px 2px;}
+  .meal-name{font-weight:600;font-size:14px;color:var(--accent-2);flex:0 0 90px;}
+  .meal-desc{font-size:13.5px;color:var(--text);line-height:1.5;}
+
+  .taper-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--panel-border);font-size:14px;}
+  .taper-row:last-child{border-bottom:none;}
+  .taper-week{font-family:var(--font-display);color:var(--accent-2);flex:0 0 78px;font-size:13.5px;}
+
+  .tracker-card{background:var(--panel);border:1px solid var(--panel-border);border-radius:10px;padding:16px;margin-bottom:8px;}
+  .tracker-num{font-family:var(--font-display);font-size:30px;margin-bottom:2px;}
+  .tracker-num small{font-family:var(--font-body);font-size:13px;color:var(--text-muted);font-weight:400;}
+  .tracker-goal{font-size:12.5px;color:var(--text-muted);margin-bottom:12px;}
+  .tracker-btns{display:flex;gap:8px;}
+  .tracker-btns button{
+    all:unset;flex:1;text-align:center;
+    background:var(--accent);color:#161822;
+    font-weight:600;font-size:13.5px;
+    padding:10px 0;border-radius:8px;cursor:pointer;
+  }
+  .tracker-btns button.ghost{background:transparent;color:var(--text-muted);border:1px solid var(--panel-border);}
+  .weight-input-row{display:flex;gap:8px;margin-bottom:12px;}
+  .weight-input-row input{
+    flex:1;background:var(--panel-2);border:1px solid var(--panel-border);
+    border-radius:8px;color:var(--text);font-size:15px;padding:10px 12px;font-family:var(--font-body);
+  }
+  .weight-input-row button{all:unset;background:var(--accent-2);color:#161822;font-weight:600;padding:0 18px;border-radius:8px;cursor:pointer;display:flex;align-items:center;}
+  .weight-entry{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--panel-border);font-size:14px;}
+  .weight-entry:last-child{border-bottom:none;}
+  .trend{font-weight:600;font-size:13px;margin-left:8px;}
+  .trend.down{color:var(--accent-2);}
+  .trend.up{color:#c47b5a;}
+  .trend.same{color:var(--text-muted);}
+  .tracker-hint{font-size:11.5px;color:var(--text-muted);margin-top:10px;font-style:italic;}
+
+  nav.tabbar{
+    position:fixed;bottom:0;left:0;right:0;
+    display:flex;justify-content:center;
+    background:rgba(16,19,28,.92);
+    backdrop-filter:blur(14px);
+    border-top:1px solid var(--panel-border);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .tabbar-inner{width:100%;max-width:480px;display:flex;}
+  .tab-btn{
+    all:unset;flex:1;text-align:center;
+    padding:12px 0 10px;
+    font-family:var(--font-body);font-size:12px;font-weight:600;
+    color:var(--text-muted);cursor:pointer;
+  }
+  .tab-btn .tab-ic{display:block;width:22px;height:22px;margin:0 auto 4px;}
+  .tab-btn.active{color:var(--accent);}
+  .tab-btn.active .tab-ic{color:var(--accent);}
+
+  /* Accessibility: all:unset above strips default focus rings — restore them for keyboard/switch-control use */
+  .tab-btn:focus-visible, .day-chip:focus-visible, .log-inputs button:focus-visible,
+  .tracker-btns button:focus-visible, .weight-input-row button:focus-visible,
+  .demo-link:focus-visible, .ex-check:focus-visible, .ex-head:focus-visible,
+  .log-remove:focus-visible, input:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+
+  /* Tap feedback */
+  .day-chip:active, .tab-btn:active, .ex-head:active, .log-inputs button:active,
+  .tracker-btns button:active, .weight-input-row button:active, .demo-link:active{
+    transform:scale(0.97);
+  }
+  .day-chip, .tab-btn, .log-inputs button, .tracker-btns button, .weight-input-row button, .demo-link{
+    transition:transform .08s ease;
+  }
+
+  /* ---- v3 additions ---- */
+  .save-warn{background:rgba(196,123,90,.12);border:1px solid rgba(196,123,90,.4);border-radius:8px;padding:10px 12px;font-size:12.5px;margin-bottom:12px;color:var(--text);}
+  .save-warn[hidden]{display:none;}
+
+  .steps-card{background:var(--panel);border:1px solid var(--panel-border);border-radius:10px;padding:14px;margin:2px 0 14px;}
+  .steps-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px;}
+  .steps-title{font-family:var(--font-display);font-size:16px;font-weight:600;}
+  .steps-title small{font-family:var(--font-body);font-size:11.5px;color:var(--text-muted);font-weight:400;display:block;margin-top:1px;}
+  .steps-target{font-size:13px;color:var(--accent);margin-top:4px;font-weight:600;}
+  .week-ctl{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-muted);flex:0 0 auto;}
+  .week-ctl button{all:unset;width:28px;height:28px;border-radius:7px;background:var(--panel-2);border:1px solid var(--panel-border);text-align:center;line-height:26px;cursor:pointer;color:var(--text);font-size:16px;}
+  .bar{height:8px;background:var(--panel-2);border-radius:100px;overflow:hidden;margin-bottom:10px;}
+  .bar i{display:block;height:100%;background:var(--accent);border-radius:100px;transition:width .3s ease;}
+  .steps-row{display:flex;gap:8px;}
+  .steps-row input{flex:1;min-width:0;background:var(--panel-2);border:1px solid var(--panel-border);border-radius:8px;color:var(--text);font-size:14px;padding:9px 11px;font-family:var(--font-body);}
+  .steps-row button{all:unset;background:var(--accent);color:#161822;font-weight:600;font-size:13px;padding:0 16px;border-radius:8px;cursor:pointer;display:flex;align-items:center;}
+  .steps-now{font-size:12.5px;color:var(--text-muted);margin-top:8px;}
+
+  .effort-card b{color:var(--accent-2);}
+  .log-last{font-size:12px;color:var(--text-muted);margin-bottom:8px;line-height:1.45;}
+  .ex-tip{background:rgba(124,148,115,.1);border:1px solid rgba(124,148,115,.3);border-radius:8px;padding:10px 12px;font-size:13px;margin-top:8px;}
+  .ex-tip b{color:var(--accent-2);}
+
+  .taper-row.now{background:rgba(201,154,59,.1);border-radius:6px;padding-left:8px;padding-right:8px;}
+
+  .backup-box{width:100%;min-height:70px;background:var(--panel-2);border:1px solid var(--panel-border);border-radius:8px;color:var(--text);font-size:12px;padding:8px 10px;font-family:ui-monospace,Menlo,monospace;margin-top:10px;resize:vertical;}
+  .backup-msg{font-size:12px;color:var(--text-muted);margin-top:8px;min-height:16px;}
+
+  /* Science tab */
+  .sci{border-bottom:1px solid var(--panel-border);}
+  .sci-head{all:unset;display:flex;gap:10px;align-items:center;width:100%;padding:13px 2px;cursor:pointer;box-sizing:border-box;}
+  .sci-main{flex:1;min-width:0;display:block;}
+  .sci-title{display:block;font-weight:600;font-size:14.5px;}
+  .sci-take{display:block;font-size:12.5px;color:var(--text-muted);margin-top:2px;line-height:1.4;}
+  .chip{flex:0 0 auto;font-size:11px;font-weight:600;padding:3px 9px;border-radius:100px;border:1px solid var(--panel-border);color:var(--text-muted);white-space:nowrap;}
+  .chip.strong{background:var(--accent-2);border-color:var(--accent-2);color:#161822;}
+  .chip.moderate{border-color:var(--accent-2);color:var(--accent-2);}
+  .chip.limited{border-color:var(--accent);color:var(--accent);}
+  .sci-chev{flex:0 0 auto;color:var(--text-muted);font-size:13px;transition:transform .2s ease;}
+  .sci.open .sci-chev{transform:rotate(90deg);}
+  .sci-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .sci.open .sci-body{max-height:2600px;}
+  .sci-inner{padding:2px 2px 16px;font-size:13.5px;line-height:1.55;}
+  .sci-inner p{margin:0 0 10px;}
+  .sci-use{background:rgba(201,154,59,.1);border:1px solid rgba(201,154,59,.3);border-radius:8px;padding:9px 11px;}
+  .sci-use b{color:var(--accent);}
+  .sci-refs{font-size:12.5px;color:var(--text-muted);}
+  .sci-refs a{color:var(--accent);display:block;margin-top:4px;text-decoration:underline;}
+  .sci-refs span{display:block;margin-top:4px;}
+  .sci-head:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  /* ---- v4: anatomical figures ---- */
+  .ex-icon{width:46px;height:46px;}
+  .ex-icon svg.fig-thumb{width:100%;height:100%;border-radius:7px;background:#1a2030;}
+  .ex-card.open .ex-detail{max-height:1200px;}
+  .ex-illustration.fig-panel{height:auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 10px;}
+  .ex-illustration.fig-panel svg.fig-big{flex:1 1 220px;height:215px;min-width:0;width:auto;}
+  .mus-legend{flex:1 1 130px;font-size:12.5px;line-height:1.4;color:var(--text);}
+  .mus-title{font-weight:600;font-size:12px;color:var(--text-muted);margin-bottom:8px;}
+  .mus-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;}
+  .mus-row b{display:block;font-size:11px;color:var(--text-muted);font-weight:600;}
+  .mus-dot{flex:0 0 auto;width:10px;height:10px;border-radius:50%;margin-top:3px;background:#e2413b;}
+  .mus-dot.s{background:#ee8b3a;}
+  .mus-note{font-size:11px;color:var(--text-muted);font-style:italic;margin-top:6px;}
+  .sci-sub{font-size:11.5px;font-weight:600;color:var(--text-muted);margin:10px 0 6px;}
+  .sci-study{font-size:12.5px;line-height:1.5;margin:0 0 9px;color:var(--text-muted);}
+  .sci-study a{color:var(--accent);font-weight:600;text-decoration:underline;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <!-- LEG PRESS: seat back + moving sled plate -->
+      <symbol id="ic-legpress" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" stroke-linecap="round" fill="none">
+          <line x1="18" y1="18" x2="34" y2="54"/>
+          <line x1="34" y1="54" x2="58" y2="58"/>
+        </g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="27" cy="20" r="9" fill="currentColor" stroke="none"/>
+          <line x1="32" y1="27" x2="50" y2="50"/>
+          <line x1="36" y1="32" x2="22" y2="42"/>
+          <line x1="50" y1="50" x2="68" y2="48"/>
+          <line x1="68" y1="48" x2="80" y2="48"><animate attributeName="x2" values="80;62;80" dur="1.5s" repeatCount="indefinite"/></line>
+        </g>
+        <g stroke="#7c9473" stroke-width="8" stroke-linecap="round">
+          <line x1="80" y1="24" x2="80" y2="70">
+            <animate attributeName="x1" values="80;62;80" dur="1.5s" repeatCount="indefinite"/>
+            <animate attributeName="x2" values="80;62;80" dur="1.5s" repeatCount="indefinite"/>
+          </line>
+        </g>
+      </symbol>
+
+      <!-- STEP-UP: box + stepping figure -->
+      <symbol id="ic-stepup" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><rect x="55" y="66" width="30" height="20"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <g>
+            <circle cx="45" cy="18" r="9" fill="currentColor" stroke="none"/>
+            <line x1="45" y1="27" x2="45" y2="55"/>
+            <line x1="45" y1="32" x2="60" y2="26"/>
+            <line x1="45" y1="32" x2="30" y2="40"/>
+            <line x1="45" y1="55" x2="63" y2="66"/>
+            <line x1="45" y1="55" x2="30" y2="70"/>
+            <line x1="30" y1="70" x2="30" y2="90"/>
+            <animateTransform attributeName="transform" type="translate" values="0,0;0,-10;0,0" dur="1.5s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- CHEST PRESS MACHINE: weight stack + horizontal press -->
+      <symbol id="ic-chestpress" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none">
+          <line x1="72" y1="15" x2="72" y2="85"/>
+          <line x1="78" y1="25" x2="90" y2="25"/><line x1="78" y1="40" x2="90" y2="40"/><line x1="78" y1="55" x2="90" y2="55"/>
+        </g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="28" cy="20" r="9" fill="currentColor" stroke="none"/>
+          <line x1="28" y1="29" x2="28" y2="58"/>
+          <line x1="28" y1="58" x2="40" y2="88"/>
+          <line x1="28" y1="58" x2="16" y2="88"/>
+          <line x1="28" y1="34" x2="44" y2="40"><animate attributeName="x2" values="44;62;44" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="28" y1="34" x2="44" y2="28"><animate attributeName="x2" values="44;62;44" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- SHOULDER PRESS MACHINE: weight stack + vertical press -->
+      <symbol id="ic-shoulderpress" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none">
+          <line x1="80" y1="15" x2="80" y2="85"/>
+          <line x1="86" y1="25" x2="96" y2="25"/><line x1="86" y1="40" x2="96" y2="40"/><line x1="86" y1="55" x2="96" y2="55"/>
+        </g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="32" cy="24" r="9" fill="currentColor" stroke="none"/>
+          <line x1="32" y1="33" x2="32" y2="62"/>
+          <line x1="32" y1="62" x2="44" y2="90"/>
+          <line x1="32" y1="62" x2="20" y2="90"/>
+          <line x1="32" y1="38" x2="47" y2="46"><animate attributeName="x2" values="47;35;47" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="46;16;46" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="32" y1="38" x2="17" y2="46"><animate attributeName="x2" values="17;29;17" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="46;16;46" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- LAT PULLDOWN: cable tower + wide bar -->
+      <symbol id="ic-latpulldown" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="50" y1="8" x2="50" y2="20"/><circle cx="50" cy="8" r="5"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="45" cy="34" r="9" fill="currentColor" stroke="none"/>
+          <line x1="45" y1="43" x2="45" y2="66"/>
+          <line x1="45" y1="66" x2="58" y2="90"/>
+          <line x1="45" y1="66" x2="32" y2="90"/>
+          <line x1="30" y1="20" x2="70" y2="20"><animate attributeName="y1" values="20;44;20" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="20;44;20" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="45" y1="43" x2="30" y2="20"><animate attributeName="y2" values="20;44;20" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="45" y1="43" x2="70" y2="20"><animate attributeName="y2" values="20;44;20" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- FACE PULL: cable at head height + rope -->
+      <symbol id="ic-facepull" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="85" y1="20" x2="85" y2="40"/><circle cx="85" cy="18" r="5"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="30" cy="24" r="9" fill="currentColor" stroke="none"/>
+          <line x1="30" y1="33" x2="30" y2="62"/>
+          <line x1="30" y1="62" x2="42" y2="90"/>
+          <line x1="30" y1="62" x2="18" y2="90"/>
+          <line x1="30" y1="38" x2="60" y2="34"><animate attributeName="x2" values="60;38;60" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="30" y1="38" x2="60" y2="42"><animate attributeName="x2" values="60;38;60" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- CABLE ROW: low pulley + seated pull -->
+      <symbol id="ic-cablerow" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="90" y1="60" x2="90" y2="80"/><circle cx="90" cy="82" r="5"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="30" cy="40" r="9" fill="currentColor" stroke="none"/>
+          <line x1="30" y1="49" x2="34" y2="70"/>
+          <line x1="34" y1="70" x2="30" y2="90"/>
+          <line x1="34" y1="70" x2="50" y2="88"/>
+          <line x1="32" y1="55" x2="80" y2="60"><animate attributeName="x2" values="80;46;80" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- DUMBBELL PRESS: flat bench + two dumbbells -->
+      <symbol id="ic-dbpress" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="15" y1="72" x2="85" y2="72"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="22" cy="58" r="9" fill="currentColor" stroke="none"/>
+          <line x1="30" y1="60" x2="70" y2="60"/>
+          <line x1="45" y1="55" x2="45" y2="40"><animate attributeName="y2" values="40;18;40" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="55" y1="55" x2="55" y2="40"><animate attributeName="y2" values="40;18;40" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor">
+          <circle cx="45" cy="40" r="5"><animate attributeName="cy" values="40;18;40" dur="1.4s" repeatCount="indefinite"/></circle>
+          <circle cx="55" cy="40" r="5"><animate attributeName="cy" values="40;18;40" dur="1.4s" repeatCount="indefinite"/></circle>
+        </g>
+      </symbol>
+
+      <!-- INCLINE PRESS: tilted bench + dumbbell -->
+      <symbol id="ic-inclinepress" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="18" y1="85" x2="46" y2="33"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="36" cy="40" r="9" fill="currentColor" stroke="none"/>
+          <line x1="41" y1="46" x2="62" y2="64"/>
+          <line x1="46" y1="48" x2="62" y2="32"><animate attributeName="x2" values="62;76;62" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="32;16;32" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor"><circle cx="62" cy="32" r="5"><animate attributeName="cx" values="62;76;62" dur="1.4s" repeatCount="indefinite"/><animate attributeName="cy" values="32;16;32" dur="1.4s" repeatCount="indefinite"/></circle></g>
+      </symbol>
+
+      <!-- ROMANIAN DEADLIFT: hip hinge holding a bar -->
+      <symbol id="ic-hinge" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <line x1="50" y1="55" x2="50" y2="90"/>
+          <g>
+            <circle cx="50" cy="18" r="9" fill="currentColor" stroke="none"/>
+            <line x1="50" y1="27" x2="50" y2="55"/>
+            <line x1="50" y1="32" x2="66" y2="32"/>
+            <line x1="50" y1="32" x2="34" y2="32"/>
+            <circle cx="66" cy="32" r="4" fill="currentColor"/>
+            <circle cx="34" cy="32" r="4" fill="currentColor"/>
+            <animateTransform attributeName="transform" type="rotate" values="0 50 55; -45 50 55; 0 50 55" dur="1.6s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- STRETCH: standing reach -->
+      <symbol id="ic-stretch" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="50" cy="20" r="9" fill="currentColor" stroke="none"/>
+          <line x1="50" y1="29" x2="50" y2="60"/>
+          <line x1="50" y1="60" x2="62" y2="90"/>
+          <line x1="50" y1="60" x2="38" y2="90"/>
+          <line x1="50" y1="34" x2="30" y2="46"/>
+          <g><line x1="50" y1="34" x2="70" y2="16"/><animateTransform attributeName="transform" type="rotate" values="0 50 34;15 50 34;0 50 34" dur="2s" repeatCount="indefinite"/></g>
+        </g>
+      </symbol>
+
+      <!-- PUSH-UP: floor, bodyweight -->
+      <symbol id="ic-pushup" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><line x1="10" y1="80" x2="90" y2="80"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <g>
+            <circle cx="80" cy="55" r="9" fill="currentColor" stroke="none"/>
+            <line x1="73" y1="58" x2="25" y2="65"/>
+            <line x1="45" y1="62" x2="45" y2="80"/>
+            <line x1="70" y1="60" x2="70" y2="80"/>
+            <animateTransform attributeName="transform" type="translate" values="0,0;0,14;0,0" dur="1.4s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- CHEST FLY: wide arc with dumbbells/cable -->
+      <symbol id="ic-fly" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="50" cy="18" r="9" fill="currentColor" stroke="none"/>
+          <line x1="50" y1="27" x2="50" y2="58"/>
+          <line x1="50" y1="58" x2="62" y2="88"/>
+          <line x1="50" y1="58" x2="38" y2="88"/>
+          <line x1="50" y1="34" x2="78" y2="34"><animate attributeName="x2" values="78;56;78" dur="1.5s" repeatCount="indefinite"/></line>
+          <line x1="50" y1="34" x2="22" y2="34"><animate attributeName="x2" values="22;44;22" dur="1.5s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor">
+          <circle cx="78" cy="34" r="5"><animate attributeName="cx" values="78;56;78" dur="1.5s" repeatCount="indefinite"/></circle>
+          <circle cx="22" cy="34" r="5"><animate attributeName="cx" values="22;44;22" dur="1.5s" repeatCount="indefinite"/></circle>
+        </g>
+      </symbol>
+
+      <!-- LATERAL RAISE: dumbbells out to the sides -->
+      <symbol id="ic-lateralraise" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="50" cy="18" r="9" fill="currentColor" stroke="none"/>
+          <line x1="50" y1="27" x2="50" y2="58"/>
+          <line x1="50" y1="58" x2="62" y2="88"/>
+          <line x1="50" y1="58" x2="38" y2="88"/>
+          <line x1="50" y1="34" x2="58" y2="50"><animate attributeName="x2" values="58;78;58" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="50;34;50" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="50" y1="34" x2="42" y2="50"><animate attributeName="x2" values="42;22;42" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="50;34;50" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor">
+          <circle cx="58" cy="50" r="5"><animate attributeName="cx" values="58;78;58" dur="1.4s" repeatCount="indefinite"/><animate attributeName="cy" values="50;34;50" dur="1.4s" repeatCount="indefinite"/></circle>
+          <circle cx="42" cy="50" r="5"><animate attributeName="cx" values="42;22;42" dur="1.4s" repeatCount="indefinite"/><animate attributeName="cy" values="50;34;50" dur="1.4s" repeatCount="indefinite"/></circle>
+        </g>
+      </symbol>
+
+      <!-- FRONT RAISE: dumbbells straight out front -->
+      <symbol id="ic-frontraise" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="50" cy="18" r="9" fill="currentColor" stroke="none"/>
+          <line x1="50" y1="27" x2="50" y2="58"/>
+          <line x1="50" y1="58" x2="62" y2="88"/>
+          <line x1="50" y1="58" x2="38" y2="88"/>
+          <line x1="50" y1="34" x2="62" y2="46"><animate attributeName="y2" values="46;22;46" dur="1.4s" repeatCount="indefinite"/></line>
+          <line x1="50" y1="34" x2="38" y2="46"><animate attributeName="y2" values="46;22;46" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor">
+          <circle cx="62" cy="46" r="5"><animate attributeName="cy" values="46;22;46" dur="1.4s" repeatCount="indefinite"/></circle>
+          <circle cx="38" cy="46" r="5"><animate attributeName="cy" values="46;22;46" dur="1.4s" repeatCount="indefinite"/></circle>
+        </g>
+      </symbol>
+
+      <!-- SINGLE-ARM ROW: bench + one dumbbell -->
+      <symbol id="ic-singlearmrow" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><rect x="15" y="55" width="30" height="10"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="55" cy="30" r="9" fill="currentColor" stroke="none"/>
+          <line x1="55" y1="39" x2="40" y2="55"/>
+          <line x1="40" y1="55" x2="30" y2="55"/>
+          <line x1="40" y1="55" x2="55" y2="75"/>
+          <line x1="40" y1="55" x2="70" y2="65"/>
+          <line x1="55" y1="45" x2="80" y2="55"><animate attributeName="x2" values="80;60;80" dur="1.4s" repeatCount="indefinite"/><animate attributeName="y2" values="55;40;55" dur="1.4s" repeatCount="indefinite"/></line>
+        </g>
+        <g fill="currentColor"><circle cx="80" cy="55" r="5"><animate attributeName="cx" values="80;60;80" dur="1.4s" repeatCount="indefinite"/><animate attributeName="cy" values="55;40;55" dur="1.4s" repeatCount="indefinite"/></circle></g>
+      </symbol>
+
+      <!-- PLANK -->
+      <symbol id="ic-plank" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="18" cy="50" r="9" fill="currentColor" stroke="none"/>
+          <line x1="27" y1="52" x2="80" y2="46"/>
+          <line x1="30" y1="55" x2="30" y2="78"/>
+          <line x1="55" y1="52" x2="55" y2="78"/>
+          <line x1="25" y1="52" x2="25" y2="66"/>
+          <animateTransform attributeName="transform" type="translate" values="0,0;0,2;0,0" dur="2.4s" repeatCount="indefinite"/>
+        </g>
+      </symbol>
+
+      <!-- DEAD BUG -->
+      <symbol id="ic-deadbug" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="50" cy="78" r="9" fill="currentColor" stroke="none"/>
+          <line x1="50" y1="69" x2="50" y2="50"/>
+          <line x1="50" y1="50" x2="66" y2="30"><animate attributeName="x2" values="66;74;66" dur="1.6s" repeatCount="indefinite"/><animate attributeName="y2" values="30;20;30" dur="1.6s" repeatCount="indefinite"/></line>
+          <line x1="50" y1="50" x2="34" y2="34"/>
+          <line x1="50" y1="69" x2="66" y2="52"/>
+          <line x1="50" y1="69" x2="34" y2="50"><animate attributeName="x2" values="34;26;34" dur="1.6s" repeatCount="indefinite"/><animate attributeName="y2" values="50;40;50" dur="1.6s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- BICYCLE CRUNCH -->
+      <symbol id="ic-bicyclecrunch" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="30" cy="60" r="9" fill="currentColor" stroke="none"/>
+          <line x1="38" y1="62" x2="58" y2="58"/>
+          <line x1="58" y1="58" x2="76" y2="46"><animate attributeName="x2" values="76;68;76" dur="1.2s" repeatCount="indefinite"/><animate attributeName="y2" values="46;70;46" dur="1.2s" repeatCount="indefinite"/></line>
+          <line x1="58" y1="58" x2="74" y2="76"><animate attributeName="x2" values="74;66;74" dur="1.2s" repeatCount="indefinite"/><animate attributeName="y2" values="76;50;76" dur="1.2s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- SIDE PLANK -->
+      <symbol id="ic-sideplank" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="20" cy="42" r="9" fill="currentColor" stroke="none"/>
+          <line x1="28" y1="45" x2="70" y2="55"/>
+          <line x1="35" y1="48" x2="35" y2="30"/>
+          <line x1="55" y1="52" x2="70" y2="80"/>
+          <line x1="55" y1="52" x2="70" y2="90"/>
+          <animateTransform attributeName="transform" type="translate" values="0,0;0,-3;0,0" dur="2.2s" repeatCount="indefinite"/>
+        </g>
+      </symbol>
+
+      <!-- CABLE WOODCHOP / RUSSIAN TWIST -->
+      <symbol id="ic-twist" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <line x1="50" y1="55" x2="50" y2="90"/>
+          <g>
+            <circle cx="50" cy="18" r="9" fill="currentColor" stroke="none"/>
+            <line x1="50" y1="27" x2="50" y2="55"/>
+            <line x1="26" y1="34" x2="74" y2="34"/>
+            <animateTransform attributeName="transform" type="rotate" values="0 50 55;-30 50 55;30 50 55;0 50 55" dur="1.8s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- CARDIO / RUNNING -->
+      <symbol id="ic-cardio" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="46" cy="18" r="9" fill="currentColor" stroke="none"/>
+          <line x1="46" y1="27" x2="52" y2="52"/>
+          <g><line x1="49" y1="32" x2="64" y2="26"/><animateTransform attributeName="transform" type="rotate" values="0 49 32;25 49 32;-20 49 32;0 49 32" dur="0.9s" repeatCount="indefinite"/></g>
+          <g><line x1="49" y1="32" x2="38" y2="42"/><animateTransform attributeName="transform" type="rotate" values="0 49 32;-20 49 32;25 49 32;0 49 32" dur="0.9s" repeatCount="indefinite"/></g>
+          <g><line x1="52" y1="52" x2="70" y2="60"/><line x1="70" y1="60" x2="68" y2="88"/><animateTransform attributeName="transform" type="rotate" values="0 52 52;-30 52 52;25 52 52;0 52 52" dur="0.9s" repeatCount="indefinite"/></g>
+          <g><line x1="52" y1="52" x2="34" y2="64"/><line x1="34" y1="64" x2="42" y2="90"/><animateTransform attributeName="transform" type="rotate" values="0 52 52;25 52 52;-30 52 52;0 52 52" dur="0.9s" repeatCount="indefinite"/></g>
+        </g>
+      </symbol>
+
+      <!-- SWIM -->
+      <symbol id="ic-swim" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="20" cy="50" r="8" fill="currentColor" stroke="none"/>
+          <line x1="27" y1="50" x2="78" y2="50"/>
+          <line x1="65" y1="50" x2="80" y2="60"/>
+          <line x1="65" y1="50" x2="80" y2="40"/>
+          <g><line x1="40" y1="50" x2="55" y2="34"/><animateTransform attributeName="transform" type="rotate" values="0 40 50;360 40 50" dur="1.6s" repeatCount="indefinite"/></g>
+          <path d="M8 56 q6 -6 12 0 q6 6 12 0"/>
+        </g>
+      </symbol>
+
+      <!-- REST -->
+      <symbol id="ic-rest" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <line x1="18" y1="72" x2="82" y2="72"/>
+          <line x1="18" y1="72" x2="18" y2="58"/>
+          <rect x="18" y="52" width="24" height="12" rx="4" fill="currentColor" stroke="none"/>
+          <line x1="42" y1="60" x2="82" y2="60"/>
+        </g>
+        <text x="66" y="34" font-family="Oswald, sans-serif" font-size="24" fill="currentColor">z</text>
+        <text x="76" y="22" font-family="Oswald, sans-serif" font-size="16" fill="currentColor">z</text>
+      </symbol>
+
+      <!-- HABITS TAB ICON -->
+      <symbol id="ic-guide" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="8" stroke-linecap="round" fill="none">
+          <rect x="24" y="14" width="52" height="72" rx="6"/>
+          <path d="M34 42 l6 6 l14 -14"/>
+          <line x1="58" y1="42" x2="68" y2="42"/>
+          <path d="M34 62 l6 6 l14 -14"/>
+          <line x1="58" y1="62" x2="68" y2="62"/>
+        </g>
+      </symbol>
+
+      <!-- WORKOUTS TAB ICON -->
+      <symbol id="ic-dumbbell" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"><line x1="30" y1="50" x2="70" y2="50"/></g>
+        <g fill="currentColor"><rect x="14" y="36" width="12" height="28" rx="4"/><rect x="74" y="36" width="12" height="28" rx="4"/></g>
+      </symbol>
+
+      <!-- DIET TAB ICON -->
+      <symbol id="ic-meal" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="8" stroke-linecap="round" fill="none">
+          <circle cx="42" cy="50" r="28"/>
+          <line x1="78" y1="20" x2="78" y2="80"/>
+          <line x1="70" y1="20" x2="70" y2="38"/>
+          <line x1="86" y1="20" x2="86" y2="38"/>
+          <line x1="70" y1="38" x2="86" y2="38"/>
+        </g>
+      </symbol>
+      <!-- TRICEPS PUSHDOWN: cable from above, elbows pinned -->
+      <symbol id="ic-pushdown" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><circle cx="66" cy="8" r="5"/></g>
+        <g stroke="#7c9473" stroke-width="3" stroke-linecap="round" fill="none">
+          <line x1="66" y1="13" x2="52" y2="34"><animate attributeName="x2" values="52;50;52" dur="1.5s" repeatCount="indefinite"/><animate attributeName="y2" values="34;72;34" dur="1.5s" repeatCount="indefinite"/></line>
+        </g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="40" cy="20" r="9" fill="currentColor" stroke="none"/>
+          <line x1="40" y1="29" x2="40" y2="60"/>
+          <line x1="40" y1="60" x2="52" y2="90"/>
+          <line x1="40" y1="60" x2="28" y2="90"/>
+          <line x1="40" y1="34" x2="46" y2="54"/>
+          <line x1="46" y1="54" x2="52" y2="34"><animate attributeName="x2" values="52;50;52" dur="1.5s" repeatCount="indefinite"/><animate attributeName="y2" values="34;72;34" dur="1.5s" repeatCount="indefinite"/></line>
+        </g>
+      </symbol>
+
+      <!-- CURL: forearm rotates up around the elbow holding a dumbbell -->
+      <symbol id="ic-curl" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="40" cy="18" r="9" fill="currentColor" stroke="none"/>
+          <line x1="40" y1="27" x2="40" y2="60"/>
+          <line x1="40" y1="60" x2="30" y2="90"/>
+          <line x1="40" y1="60" x2="50" y2="90"/>
+          <line x1="40" y1="34" x2="56" y2="56"/>
+          <g>
+            <line x1="56" y1="56" x2="56" y2="80"/>
+            <circle cx="56" cy="82" r="6" fill="currentColor" stroke="none"/>
+            <animateTransform attributeName="transform" type="rotate" values="-25 56 56;-150 56 56;-25 56 56" dur="1.8s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- OVERHEAD TRICEPS EXTENSION -->
+      <symbol id="ic-overhead" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="54" cy="38" r="9" fill="currentColor" stroke="none"/>
+          <line x1="54" y1="47" x2="54" y2="72"/>
+          <line x1="54" y1="72" x2="64" y2="96"/>
+          <line x1="54" y1="72" x2="44" y2="96"/>
+          <line x1="50" y1="52" x2="44" y2="32"/>
+          <g>
+            <line x1="44" y1="32" x2="44" y2="12"/>
+            <circle cx="44" cy="11" r="6" fill="currentColor" stroke="none"/>
+            <animateTransform attributeName="transform" type="rotate" values="-150 44 32;0 44 32;-150 44 32" dur="1.8s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- STANDING CALF RAISE: rising onto the toes on a step -->
+      <symbol id="ic-calf" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><rect x="40" y="90" width="36" height="8"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <g>
+            <circle cx="52" cy="14" r="9" fill="currentColor" stroke="none"/>
+            <line x1="52" y1="23" x2="52" y2="56"/>
+            <line x1="52" y1="30" x2="40" y2="52"/>
+            <line x1="52" y1="30" x2="64" y2="52"/>
+            <line x1="52" y1="56" x2="52" y2="88"/>
+            <line x1="52" y1="88" x2="64" y2="88"/>
+            <animateTransform attributeName="transform" type="translate" values="0,3;0,-9;0,3" dur="1.6s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- FARMER'S CARRY: walking with heavy dumbbells at the sides -->
+      <symbol id="ic-carry" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <circle cx="50" cy="16" r="9" fill="currentColor" stroke="none"/>
+          <line x1="50" y1="25" x2="50" y2="58"/>
+          <line x1="50" y1="32" x2="38" y2="64"/>
+          <line x1="50" y1="32" x2="62" y2="64"/>
+          <g><line x1="50" y1="58" x2="50" y2="90"/><animateTransform attributeName="transform" type="rotate" values="0 50 58;16 50 58;-16 50 58;0 50 58" dur="1.2s" repeatCount="indefinite"/></g>
+          <g><line x1="50" y1="58" x2="50" y2="90"/><animateTransform attributeName="transform" type="rotate" values="0 50 58;-16 50 58;16 50 58;0 50 58" dur="1.2s" repeatCount="indefinite"/></g>
+        </g>
+        <g fill="currentColor"><rect x="30" y="64" width="16" height="12" rx="3"/><rect x="54" y="64" width="16" height="12" rx="3"/></g>
+      </symbol>
+
+      <!-- DEAD HANG: hanging from a bar -->
+      <symbol id="ic-hang" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="7" stroke-linecap="round" fill="none"><line x1="12" y1="8" x2="88" y2="8"/></g>
+        <g stroke="currentColor" stroke-width="8" stroke-linecap="round" fill="none">
+          <g>
+            <line x1="28" y1="8" x2="44" y2="46"/>
+            <line x1="72" y1="8" x2="56" y2="46"/>
+            <circle cx="50" cy="30" r="8" fill="currentColor" stroke="none"/>
+            <line x1="50" y1="46" x2="50" y2="72"/>
+            <line x1="50" y1="72" x2="45" y2="96"/>
+            <line x1="50" y1="72" x2="55" y2="96"/>
+            <animateTransform attributeName="transform" type="rotate" values="0 50 8;2.5 50 8;-2.5 50 8;0 50 8" dur="3s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- WRIST CURL: forearm on a bench, hand curls up -->
+      <symbol id="ic-wristcurl" viewBox="0 0 100 100">
+        <g stroke="#7c9473" stroke-width="6" fill="none"><rect x="8" y="62" width="52" height="10" rx="2"/></g>
+        <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+          <line x1="12" y1="54" x2="58" y2="54"/>
+          <g>
+            <line x1="58" y1="54" x2="74" y2="54"/>
+            <circle cx="80" cy="54" r="7" fill="currentColor" stroke="none"/>
+            <animateTransform attributeName="transform" type="rotate" values="0 58 54;-45 58 54;0 58 54" dur="1.6s" repeatCount="indefinite"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- SCIENCE TAB ICON: flask -->
+      <symbol id="ic-science" viewBox="0 0 100 100">
+        <g stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M38 14 h24"/>
+          <path d="M44 14 v24 L24 74 a8 8 0 0 0 7 12 h38 a8 8 0 0 0 7 -12 L56 38 V14"/>
+          <path d="M33 62 h34"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div id="figDefsHost" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></div>
+  <header>
+    <span class="badge">Phase 1 · Fat loss</span>
+    <h1>Your Plan</h1>
+  </header>
+
+  <main>
+    <!-- WORKOUTS -->
+    <section id="view-workouts" class="active">
+      <div id="saveWarn" class="save-warn" hidden></div>
+      <div id="stepsCard"></div>
+      <div class="day-strip" id="dayStrip"></div>
+      <div class="day-title" id="dayTitle"></div>
+      <p class="day-sub" id="daySub"></p>
+      <p class="progress-line" id="dayProgress"></p>
+      <div id="exerciseList"></div>
+    </section>
+
+    <!-- DIET -->
+    <section id="view-diet">
+      <h2 class="section-h" style="margin-top:6px;">Daily targets</h2>
+      <p class="section-p">Every day in the 8-day rotation below lands close to this.</p>
+      <div class="stat-grid">
+        <div class="stat"><span class="num">2,250</span><span class="lbl">kcal</span></div>
+        <div class="stat"><span class="num">170–190g</span><span class="lbl">protein</span></div>
+        <div class="stat"><span class="num">72g</span><span class="lbl">fat</span></div>
+        <div class="stat"><span class="num">197g</span><span class="lbl">carbs</span></div>
+      </div>
+      <div class="note-card"><b>Protein</b> — in a calorie deficit with hard training, higher protein did better in one trial. Aim for 170–190 g a day (about 1.8–2.0 g per kg); 150 g is the floor. The meals below sit near the top of that range.</div>
+      <div class="note-card"><b>Calories are an estimate</b> — 2,250 is a calculated starting point, not a measurement. Judge it by your 4-week trend in weight and waist, and recheck every 4–6 weeks as you lose weight, because maintenance calories drop too.</div>
+
+      <h2 class="section-h">8-day meal rotation</h2>
+      <p class="section-p">Cycle through these — once you hit Day 8, go back to Day 1.</p>
+      <div class="day-strip" id="mealStrip"></div>
+      <div id="mealList"></div>
+
+      <div class="note-card" style="margin-top:18px;"><b>After training</b> — the timing matters less than your total protein for the day. If your next meal is a long way off, a quick snack helps you hit your total: 250g Greek yogurt + a banana, or 2 boiled eggs + a piece of fruit.</div>
+
+      <h2 class="section-h">Eating with family</h2>
+      <p class="section-p">When it's a shared meal, not your own plate:</p>
+      <div class="note-card"><b>Build your plate</b> — protein first (fill a third of the plate), a modest portion of rice, then load up on any vegetables or salad on the table. Go back for more protein/veg before more carbs if still hungry.</div>
+      <div class="note-card"><b>Wheat can hide in shared dishes</b> — watch for: bread served alongside the meal, thickened stews or gravies (wheat flour is a common thickener), battered or breaded meats, and pasta-based sides. When unsure, ask or stick to the plainly grilled/roasted items and rice.</div>
+
+      <h2 class="section-h">Wheat-free carbs</h2>
+      <div class="food-tags">
+        <span class="food-tag">Rice</span>
+        <span class="food-tag">Potatoes</span>
+        <span class="food-tag">Sweet potato</span>
+        <span class="food-tag">Quinoa</span>
+        <span class="food-tag">Corn</span>
+        <span class="food-tag">GF oats</span>
+        <span class="food-tag">Lentils</span>
+        <span class="food-tag">Chickpeas</span>
+      </div>
+
+      <h2 class="section-h">Cutting the soda</h2>
+      <div id="taperList"></div>
+    </section>
+
+    <!-- BEST PRACTICES -->
+    <section id="view-habits">
+      <h2 class="section-h" style="margin-top:6px;">Water</h2>
+      <p class="section-p">About 3 litres a day from drinks is a solid baseline (the reference total is 3.7 L including the water in food). Go higher on training days and hot days, and spread it through the day.</p>
+      <div class="tracker-card">
+        <div class="tracker-num"><span id="waterVal">0</span><small> ml today</small></div>
+        <div class="tracker-goal">Goal: ~3,000 ml from drinks</div>
+        <div class="tracker-btns">
+          <button onclick="addWater(250)">+250ml</button>
+          <button onclick="addWater(500)">+500ml</button>
+          <button class="ghost" onclick="resetWater()">Reset</button>
+        </div>
+      </div>
+
+      <h2 class="section-h">Daily steps</h2>
+      <p class="section-p">Your step target also sits at the top of the Workouts tab, with a box to log today's count from the Health app. Ramp up gradually from near-zero rather than jumping to 10k.</p>
+      <div id="stepList"></div>
+
+      <h2 class="section-h">Meal timing around workouts</h2>
+      <div class="note-card"><b>Before</b> — a balanced meal 1.5–2 hrs pre-training. Training soon after waking? Keep it light: a banana or a couple of eggs.</div>
+      <div class="note-card"><b>After</b> — timing matters less than your total protein for the day. Eat when it suits you. If you train hungry and feel weak, have something light first.</div>
+
+      <h2 class="section-h">Sleep &amp; recovery</h2>
+      <div class="note-card"><b>Sleep</b> — you're already at 8+ hrs. Keep it exactly as is, and try to keep the same sleep/wake time daily.</div>
+      <div class="note-card"><b>Rest day</b> — Day 7 is a full rest day. Respect it, don't fill it with extra training.</div>
+      <div class="note-card"><b>Sauna &amp; jacuzzi</b> — great for recovery, not for fat loss. Sweat lost there is water, back within hours.</div>
+
+      <h2 class="section-h">Warm-up &amp; injury prevention</h2>
+      <div class="note-card"><b>Weeks 1–2</b> — technique only. Light weight, perfect form. Add load from week 3 onward.</div>
+      <div class="note-card"><b>Muscle soreness (DOMS)</b> — expect real soreness in the first weeks. It usually eases over 2–3 weeks as your body adapts (the second time you do an exercise, you get less sore). Joint pain is different — stop a set immediately if you feel that.</div>
+      <div class="note-card"><b>Pain vs. burn</b> — muscle burn during a set is normal. Joint pain is not — stop the set if you feel it.</div>
+      <div class="note-card"><b>Progression</b> — open any exercise to see what you did last time, and try to beat it. When you reach the top of the rep range on every set, add a little weight next time. Never a sudden jump.</div>
+      <div class="note-card"><b>Warm-up</b> — structured warm-ups (squats, lunges, balance) cut injuries in team-sport trials, and it's quick. I found no trials in gym lifters. Add 1–2 lighter sets of your first lift too.</div>
+      <div class="note-card"><b>Deload only if you need one</b> — there's no tested schedule for beginners. If your lifts stall or you feel run down for about two weeks, take one lighter week: same exercises, roughly a third fewer sets and 20–30% less weight.</div>
+
+      <h2 class="section-h">Hands &amp; grip</h2>
+      <div class="note-card"><b>Grip</b> — farmer's carries on Days 1 and 5 train your hands, and so does all your pulling. If your hands let go before your back or legs are tired on a lift, note it in your log.</div>
+      <div class="note-card"><b>Straps</b> — only on heavy Romanian deadlift sets, when your grip fails before your hamstrings do. Skip them elsewhere so your grip still gets trained.</div>
+      <div class="note-card"><b>See a doctor if</b> — you get numbness, tingling or pain in your hands, you drop things, or the weakness came on suddenly.</div>
+
+      <h2 class="section-h">Looking ahead</h2>
+      <div class="note-card"><b>Ramadan (expected ~Feb 8, 2027)</b> — fasting will change your training and meal timing completely. This plan assumes normal eating hours for now. As it gets closer, come back and we'll rebuild the training/meal schedule around your actual fasting window and phase at that time.</div>
+
+      <h2 class="section-h">Weekly check-in</h2>
+      <div class="tracker-card">
+        <div class="weight-input-row">
+          <input type="number" inputmode="decimal" id="weightInput" placeholder="Weight (kg)" step="0.1" aria-label="Weight in kilograms">
+          <input type="number" inputmode="decimal" id="waistInput" placeholder="Waist (cm)" step="0.5" aria-label="Waist in centimeters">
+          <button onclick="logWeight()">Log</button>
+        </div>
+        <div id="weightLog"></div>
+        <div class="tracker-hint">Same conditions each time: morning, after the bathroom, before food. Waist matters as much as the scale for what you're after — track both.</div>
+      </div>
+
+      <h2 class="section-h">Backup</h2>
+      <p class="section-p">Your numbers are saved on this device. On iPhone, the Safari tab and the Home Screen icon keep separate data, so always open the same one. Copy a backup now and then.</p>
+      <div class="tracker-card">
+        <div class="tracker-btns">
+          <button type="button" onclick="exportData()">Copy backup</button>
+          <button type="button" class="ghost" onclick="importData()">Restore from box</button>
+        </div>
+        <textarea id="backupBox" class="backup-box" aria-label="Backup text" placeholder="Backup text appears here. To restore, paste a backup here and tap Restore."></textarea>
+        <div class="backup-msg" id="backupMsg"></div>
+      </div>
+    </section>
+
+    <!-- SCIENCE -->
+    <section id="view-science">
+      <h2 class="section-h" style="margin-top:6px;">The evidence behind your plan</h2>
+      <p class="section-p">Tap a topic for the individual trials behind it, what they found, and how it shapes your plan. The labels are my plain-language read of how solid the evidence is for someone like you, not an official grade.</p>
+      <div id="scienceList"></div>
+
+      <h2 class="section-h">Limits of this evidence</h2>
+      <div class="note-card">Most of these trials had 10–70 people and ran 6–12 weeks, in young men, women or older adults. Few were in someone like you, a beginner carrying extra fat, so treat this as the best available guidance, not a guarantee.</div>
+      <div class="note-card"><b>Not checked yet</b> — how accurate the calorie estimate is, machines versus free weights for beginners, and cardio and fat loss. I read abstracts, not full papers, and my PubMed searches were not a formal systematic review.</div>
+
+      <h2 class="section-h">Changed from the first version</h2>
+      <div class="note-card">Plan trimmed to 21 exercises and about 57 sets. A second leg exercise (leg curl) was added. Rest is now 1–3 minutes and going to failure isn't needed. Protein is 170–190 g. Deloads are only when needed. Every topic above now lists the individual trials behind it, not just meta-analyses.</div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <div class="tabbar-inner">
+      <button class="tab-btn active" data-tab="view-workouts">
+        <svg class="tab-ic" viewBox="0 0 100 100"><use href="#ic-dumbbell"/></svg>
+        Workouts
+      </button>
+      <button class="tab-btn" data-tab="view-diet">
+        <svg class="tab-ic" viewBox="0 0 100 100"><use href="#ic-meal"/></svg>
+        Diet
+      </button>
+      <button class="tab-btn" data-tab="view-habits">
+        <svg class="tab-ic" viewBox="0 0 100 100"><use href="#ic-guide"/></svg>
+        Habits
+      </button>
+      <button class="tab-btn" data-tab="view-science">
+        <svg class="tab-ic" viewBox="0 0 100 100"><use href="#ic-science"/></svg>
+        Science
+      </button>
+    </div>
+  </nav>
+</div>
+
+<script>
+/* ===== Anatomical figure engine (original artwork, drawn in code) ===== */
+const FIG = (function(){
+const R = Math.PI/180;
+const LEN = {ua:20, fa:18, th:28, sh:27, tor:36, neck:5.5, head:7.4};
+const COL = {skin:'url(#gSkin)', skinFar:'#b89c88', line:'#7a5d4b', short:'#1d2029', shortLine:'#3a3f50',
+  mus:'url(#gMus)', musS:'url(#gMusS)', fiber:'#8f1717', fiberS:'#9a4a14',
+  steel:'#b9c1cf', steelD:'#7d8697', pad:'#4b556b', padL:'#66728b', floor:'#262d3f', hair:'#2a2420', shoe:'#2d3243', sole:'#8f98aa'};
+const f = n => (Math.round(n*10)/10);
+const P2 = p => f(p[0])+' '+f(p[1]);
+const lin = (a,b,t)=>a+(b-a)*t;
+const bump = (t,c,w)=>Math.exp(-((t-c)*(t-c))/(2*w*w));
+function tbl(pts){ return t=>{ for(let i=1;i<pts.length;i++){ if(t<=pts[i][0]){ const a=pts[i-1], b=pts[i]; return lin(a[1],b[1],(t-a[0])/((b[0]-a[0])||1)); } } return pts[pts.length-1][1]; }; }
+const dDown = a => [Math.sin(a*R), Math.cos(a*R)];
+const add = (p,v,s)=>[p[0]+v[0]*(s===undefined?1:s), p[1]+v[1]*(s===undefined?1:s)];
+
+/* thickness profiles (half-widths) */
+const PRO = {
+  ua:{f:t=>lin(6.6,4.9,t)+1.9*bump(t,.46,.22), b:t=>lin(6.6,4.9,t)+1.6*bump(t,.40,.22)},
+  fa:{f:t=>lin(5.0,2.8,t)+1.4*bump(t,.20,.20), b:t=>lin(4.8,2.7,t)+1.3*bump(t,.25,.20)},
+  th:{f:t=>lin(10.4,6.4,t)+2.4*bump(t,.38,.25), b:t=>lin(10.0,6.0,t)+1.8*bump(t,.32,.25)},
+  sh:{f:t=>lin(6.0,3.3,t)+0.6*bump(t,.15,.12), b:t=>lin(6.0,3.2,t)+3.6*bump(t,.24,.17)},
+  tor:{f:tbl([[0,8.6],[.18,8.2],[.35,9.2],[.55,11.8],[.70,13.0],[.88,10.2],[1,6.0]]),
+       b:tbl([[0,9.6],[.18,7.8],[.35,8.6],[.55,10.8],[.72,12.0],[.90,10.2],[1,6.2]])}
+};
+
+function smooth(p, closed){
+  const n=p.length; let d='M'+P2(p[0]);
+  const cnt = closed? n : n-1;
+  for(let i=0;i<cnt;i++){
+    const g = k => closed ? p[(k+n)%n] : p[Math.max(0,Math.min(n-1,k))];
+    const p0=g(i-1), p1=g(i), p2=g(i+1), p3=g(i+2);
+    const c1=[p1[0]+(p2[0]-p0[0])/6, p1[1]+(p2[1]-p0[1])/6];
+    const c2=[p2[0]-(p3[0]-p1[0])/6, p2[1]-(p3[1]-p1[1])/6];
+    d+=' C'+P2(c1)+' '+P2(c2)+' '+P2(p2);
+  }
+  return d+(closed?'Z':'');
+}
+
+/* a tube from A to B with anterior normal nf */
+function tube(A,B,nf,pf,pb,n){
+  n=n||10; const fr=[], bk=[], ce=[];
+  for(let i=0;i<=n;i++){ const t=i/n; const c=[lin(A[0],B[0],t), lin(A[1],B[1],t)];
+    ce.push(c); fr.push([c[0]+nf[0]*pf(t), c[1]+nf[1]*pf(t)]); bk.push([c[0]-nf[0]*pb(t), c[1]-nf[1]*pb(t)]); }
+  return {A,B,nf,pf,pb,fr,bk,ce};
+}
+function tubePath(T,t0,t1,grow){
+  t0=t0||0; t1=t1===undefined?1:t1; grow=grow||0; const n=10, fr=[], bk=[];
+  for(let i=0;i<=n;i++){ const t=lin(t0,t1,i/n); const c=[lin(T.A[0],T.B[0],t), lin(T.A[1],T.B[1],t)];
+    fr.push([c[0]+T.nf[0]*(T.pf(t)+grow), c[1]+T.nf[1]*(T.pf(t)+grow)]); bk.push([c[0]-T.nf[0]*(T.pb(t)+grow), c[1]-T.nf[1]*(T.pb(t)+grow)]); }
+  return smooth(fr.concat(bk.reverse()), true);
+}
+/* a muscle belly (lens) along a tube, returns svg */
+function lens(T,t0,t1,side,thick,fill,fiber,op){
+  thick = thick||1.0; const n=12, outer=[], inner=[];
+  for(let i=0;i<=n;i++){ const u=i/n, t=lin(t0,t1,u), k=Math.pow(Math.sin(Math.PI*u),0.75);
+    const c=[lin(T.A[0],T.B[0],t), lin(T.A[1],T.B[1],t)];
+    if(side==='front'){ const o=T.pf(t)*0.96; outer.push([c[0]+T.nf[0]*o, c[1]+T.nf[1]*o]); const w=o*thick*k*1.15; inner.push([c[0]+T.nf[0]*(o-w), c[1]+T.nf[1]*(o-w)]); }
+    else if(side==='back'){ const o=T.pb(t)*0.96; outer.push([c[0]-T.nf[0]*o, c[1]-T.nf[1]*o]); const w=o*thick*k*1.15; inner.push([c[0]-T.nf[0]*(o-w), c[1]-T.nf[1]*(o-w)]); }
+    else { const of=T.pf(t)*0.93*k*thick, ob=T.pb(t)*0.93*k*thick; outer.push([c[0]+T.nf[0]*of, c[1]+T.nf[1]*of]); inner.push([c[0]-T.nf[0]*ob, c[1]-T.nf[1]*ob]); }
+  }
+  const path = smooth(outer.concat(inner.slice().reverse()), true);
+  let s = `<path d="${path}" fill="${fill}" stroke="${fiber}" stroke-width=".45" opacity="${op}"/>`;
+  [0.3,0.55,0.78].forEach(fr=>{ const line=outer.map((p,i)=>[lin(inner[i][0],p[0],fr), lin(inner[i][1],p[1],fr)]).slice(1,-1);
+    if(line.length>2) s+=`<path d="${smooth(line,false)}" fill="none" stroke="${fiber}" stroke-width=".4" opacity="${op*0.55}"/>`; });
+  return s;
+}
+const LIGHT=[-0.55,-0.83];
+function shade(T,far){
+  const s=(T.nf[0]*LIGHT[0]+T.nf[1]*LIGHT[1])>=0?1:-1, n=12, hi=[], hi2=[], sh=[], sh2=[];
+  for(let i=0;i<=n;i++){ const u=i/n, t=lin(0.05,0.95,u), k=Math.pow(Math.sin(Math.PI*(0.04+0.92*u)),0.55);
+    const c=[lin(T.A[0],T.B[0],t),lin(T.A[1],T.B[1],t)];
+    const hw1=(s>0?T.pf(t):T.pb(t)), hw2=(s>0?T.pb(t):T.pf(t));
+    const a1=[c[0]+T.nf[0]*s*hw1*0.30*k, c[1]+T.nf[1]*s*hw1*0.30*k], b1=[c[0]+T.nf[0]*s*hw1*0.72*k, c[1]+T.nf[1]*s*hw1*0.72*k];
+    hi.push(a1); hi2.push(b1);
+    const a2=[c[0]-T.nf[0]*s*hw2*0.42*k, c[1]-T.nf[1]*s*hw2*0.42*k], b2=[c[0]-T.nf[0]*s*hw2*0.96*k, c[1]-T.nf[1]*s*hw2*0.96*k];
+    sh.push(a2); sh2.push(b2); }
+  return `<path d="${smooth(hi.concat(hi2.slice().reverse()),true)}" fill="#fff" opacity="${far?.12:.26}"/><path d="${smooth(sh.concat(sh2.slice().reverse()),true)}" fill="#4a2f22" opacity="${far?.16:.3}"/>`;
+}
+function ell(c,rx,ry,rot,fill,stroke,sw,op){ return `<ellipse cx="${f(c[0])}" cy="${f(c[1])}" rx="${rx}" ry="${ry}" transform="rotate(${f(rot)} ${f(c[0])} ${f(c[1])})" fill="${fill}" ${stroke?`stroke="${stroke}" stroke-width="${sw||.5}"`:''} ${op?`opacity="${op}"`:''}/>`; }
+
+/* forward kinematics */
+function fk(P){
+  P = Object.assign({hx:100,hy:69,tl:0,hn:0,ua:5,fa:5,th:0,sh:0,ft:0}, P);
+  const far = {ua:P.ua2===undefined?P.ua:P.ua2, fa:P.fa2===undefined?P.fa:P.fa2, th:P.th2===undefined?P.th:P.th2, sh:P.sh2===undefined?P.sh:P.sh2, ft:P.ft2===undefined?P.ft:P.ft2};
+  function build(dx,dy){
+    const H=[P.hx+dx,P.hy+dy];
+    const up=[Math.sin(P.tl*R), -Math.cos(P.tl*R)], fn=[Math.cos(P.tl*R), Math.sin(P.tl*R)];
+    const N=add(H,up,LEN.tor), S=add(add(H,up,LEN.tor*0.9),fn,-1);
+    const hAng=P.tl+P.hn, hUp=[Math.sin(hAng*R),-Math.cos(hAng*R)], hFw=[Math.cos(hAng*R),Math.sin(hAng*R)];
+    const C=add(add(N,hUp,LEN.neck+LEN.head*0.8),hFw,1.0);
+    const J={H,N,S,up,fn,C,hAng,hUp,hFw};
+    function arm(a1,a2){ const E=add(S,dDown(a1),LEN.ua), W=add(E,dDown(a2),LEN.fa), Hd=add(W,dDown(a2),4.2); return {E,W,Hd,a1,a2}; }
+    function leg(a1,a2,ft){ const K=add(H,dDown(a1),LEN.th), A=add(K,dDown(a2),LEN.sh), fd=[Math.cos(ft*R),Math.sin(ft*R)], T=add(A,fd,11.5); return {K,A,T,a1,a2,ft,fd}; }
+    J.arm=arm(P.ua,P.fa); J.armF=arm(far.ua,far.fa); J.leg=leg(P.th,P.sh,P.ft); J.legF=leg(far.th,far.sh,far.ft);
+    return J;
+  }
+  let J=build(0,0);
+  /* pin near ankle / toe to a fixed point (translate the whole body) */
+  if(P.pinA){ const dx=P.pinA[0]-J.leg.A[0], dy=P.pinA[1]-J.leg.A[1]; J=build(dx,dy); }
+  else if(P.pinT){ const dx=P.pinT[0]-J.leg.T[0], dy=P.pinT[1]-J.leg.T[1]; J=build(dx,dy); }
+  J.P=P; return J;
+}
+
+function shoe(A,ft,col){
+  const u=[Math.cos(ft*R),Math.sin(ft*R)], v=[-Math.sin(ft*R),Math.cos(ft*R)];
+  const L=(a,b)=>[A[0]+u[0]*a+v[0]*b, A[1]+u[1]*a+v[1]*b];
+  const pts=[L(-4.6,4.6),L(-5.4,-0.5),L(-2,-4.2),L(2.5,-3.4),L(7,0),L(12.5,2.6),L(12.8,4.8),L(2,5.2)];
+  const sole=[L(-4.8,4.4),L(12.9,4.4),L(12.9,5.6),L(-4.8,5.6)];
+  return `<path d="${smooth(pts,true)}" fill="${COL.shoe}" stroke="#14161d" stroke-width=".5"/><path d="${smooth(sole,true)}" fill="${COL.sole}"/>`;
+}
+
+function drawLeg(J,L,far,hl){
+  const col = far? COL.skinFar : COL.skin;
+  const nfT=[Math.cos(L.a1*R),-Math.sin(L.a1*R)], nfS=[Math.cos(L.a2*R),-Math.sin(L.a2*R)];
+  const TH=tube(J.H,L.K,nfT,PRO.th.f,PRO.th.b), SH=tube(L.K,L.A,nfS,PRO.sh.f,PRO.sh.b);
+  let s='';
+  s+=`<path d="${tubePath(SH)}" fill="${col}" stroke="${COL.line}" stroke-width=".5"/>`+shade(SH,far);
+  s+=`<circle cx="${f(L.K[0])}" cy="${f(L.K[1])}" r="6.0" fill="${col}"/>`;
+  s+=`<path d="${tubePath(TH)}" fill="${col}" stroke="${COL.line}" stroke-width=".5"/>`+shade(TH,far);
+  const ln=(T,t0,t1,k,side)=>{ const pts=[]; for(let i=0;i<=6;i++){ const t=lin(t0,t1,i/6), c=[lin(T.A[0],T.B[0],t),lin(T.A[1],T.B[1],t)]; const o=side==='f'?T.pf(t)*k:-T.pb(t)*k; pts.push([c[0]+T.nf[0]*o,c[1]+T.nf[1]*o]); } return `<path d="${smooth(pts,false)}" fill="none" stroke="#a98772" stroke-width=".5" opacity="${far?.35:.6}" stroke-linecap="round"/>`; };
+  s+=ln(TH,.18,.72,.45,'f')+ln(TH,.2,.75,.4,'b')+ln(SH,.1,.55,.4,'b');
+  s+=shoe(L.A,L.ft);
+  return {svg:s,TH,SH};
+}
+function drawArm(J,A,far){
+  const col= far? COL.skinFar : COL.skin;
+  const nfU=[Math.cos(A.a1*R),-Math.sin(A.a1*R)], nfF=[Math.cos(A.a2*R),-Math.sin(A.a2*R)];
+  const UA=tube(J.S,A.E,nfU,PRO.ua.f,PRO.ua.b), FA=tube(A.E,A.W,nfF,PRO.fa.f,PRO.fa.b);
+  let s='';
+  s+=`<path d="${tubePath(FA)}" fill="${col}" stroke="${COL.line}" stroke-width=".5"/>`+shade(FA,far);
+  s+=`<circle cx="${f(A.E[0])}" cy="${f(A.E[1])}" r="4.8" fill="${col}"/>`;
+  s+=`<path d="${tubePath(UA)}" fill="${col}" stroke="${COL.line}" stroke-width=".5"/>`+shade(UA,far);
+  s+=`<circle cx="${f(A.W[0]+Math.sin(A.a2*R)*1.5)}" cy="${f(A.W[1]+Math.cos(A.a2*R)*1.5)}" r="3.7" fill="${col}" stroke="${COL.line}" stroke-width=".4"/>`;
+  return {svg:s,UA,FA};
+}
+
+/* muscle highlight specs: {s:seg, a,b:t-range, side, p:1 primary / 0 secondary, k:thickness} */
+function hlSeg(sp,T,op){
+  const fill = sp.p===0? COL.musS : COL.mus, fib = sp.p===0? COL.fiberS : COL.fiber;
+  return lens(T,sp.a,sp.b,sp.side||'both',sp.k||1,fill,fib,op===undefined?0.95:op);
+}
+
+function render(P, spec, scene, opt){
+  opt=opt||{}; const J=fk(P);
+  const sc = scene? scene(J,P,opt.k||0) : {back:'',front:''};
+  const specs=(spec&&spec.hl)||[];
+  let svg='';
+  svg+=`<rect x="0" y="130" width="200" height="10" fill="${COL.floor}"/><line x1="0" y1="130.4" x2="200" y2="130.4" stroke="#39425a" stroke-width=".8"/>`;
+  svg+=`<ellipse cx="${f((J.leg.A[0]+J.legF.A[0])/2+4)}" cy="130.6" rx="26" ry="2.2" fill="#000" opacity=".28"/>`;
+  svg+=sc.back||'';
+  /* far limbs */
+  const farLeg=drawLeg(J,J.legF,true), farArm=drawArm(J,J.armF,true);
+  svg+=farArm.svg+farLeg.svg;
+  /* far-limb highlights (softer) */
+  specs.forEach(sp=>{ if(sp.near) return; const T={ua:farArm.UA,fa:farArm.FA,th:farLeg.TH,sh:farLeg.SH}[sp.s]; if(T && !sp.noFar) svg+=hlSeg(sp,T,0.5); });
+  /* torso */
+  const nfTor=J.fn, torT=tube(J.H,J.N,nfTor,PRO.tor.f,PRO.tor.b,12);
+  svg+=`<path d="${tubePath(torT)}" fill="${COL.skin}" stroke="${COL.line}" stroke-width=".5"/>`+shade(torT,false);
+  /* surface contours */
+  (function(){ const cl=(a,b,c2,op)=>`<path d="M${P2(a)} Q${P2(c2)} ${P2(b)}" fill="none" stroke="#a98772" stroke-width=".55" opacity="${op||.7}" stroke-linecap="round"/>`;
+    const sp=t=>add(J.H,J.up,LEN.tor*t);
+    const pF=(t,k)=>add(sp(t),J.fn,PRO.tor.f(t)*k), pB=(t,k)=>add(sp(t),J.fn,-PRO.tor.b(t)*k);
+    svg+=cl(pF(.60,.97),pF(.71,.30),pF(.62,.55)); svg+=cl(pF(.42,.90),pF(.50,.35),pF(.44,.55),.5);
+    svg+=cl(pB(.50,.96),pB(.74,.35),pB(.58,.60),.55);
+  })();
+  /* pelvis + shorts */
+  const gC=add(add(J.H,J.fn,-3.6),J.up,0.6);
+  svg+=ell(gC,9.6,8.6,P.tl,COL.short,null);
+  svg+=`<path d="${tubePath(torT,0,0.16,0.3)}" fill="${COL.short}" stroke="${COL.shortLine}" stroke-width=".4"/>`;
+  /* near leg */
+  const nearLeg=drawLeg(J,J.leg,false);
+  svg+=nearLeg.svg;
+  svg+=`<path d="${tubePath(nearLeg.TH,0,0.52,0.9)}" fill="${COL.short}" stroke="${COL.shortLine}" stroke-width=".4"/>`;
+  /* neck + head */
+  const Nb=J.N, hb=add(J.N,J.hUp,LEN.neck+2);
+  svg+=`<path d="${tubePath(tube(Nb,hb,J.hFw,()=>4.4,()=>5.0,4))}" fill="${COL.skin}" stroke="${COL.line}" stroke-width=".4"/>`;
+  const hr=P.tl+P.hn;
+  svg+=ell(add(add(J.C,J.hFw,-0.9),J.hUp,0.5),7.1,8.4,hr,COL.hair,null);
+  svg+=ell(add(add(J.C,J.hFw,2.0),J.hUp,-0.6),5.6,7.0,hr,COL.skin,COL.line,.45);
+  svg+=E.circ(add(add(J.C,J.hFw,4.0),J.hUp,1.2),0.7,'#2a2420');
+  const nose=add(J.C,J.hFw,6.9), nose2=add(add(J.C,J.hFw,5.6),J.hUp,-1.6), nose3=add(add(J.C,J.hFw,5.9),[-J.hUp[0],-J.hUp[1]],0.4);
+  svg+=`<path d="M${P2(add(nose2,J.hUp,2.2))} L${P2(nose)} L${P2(nose3)}" fill="none" stroke="${COL.line}" stroke-width=".5" stroke-linecap="round"/>`;
+  svg+=ell(add(add(J.C,J.hFw,-0.4),J.hUp,-0.3),1.4,1.9,hr,'#c7a690',COL.line,.3);
+  /* near arm */
+  const nearArm=drawArm(J,J.arm,false);
+  svg+=nearArm.svg;
+  svg+=ell(add(J.S,dDown(P.ua||0),3.8),7.0,6.2,-(P.ua||0)+90,COL.skin,COL.line,.45);
+  /* near highlights */
+  specs.forEach(sp=>{
+    let T=null;
+    if(sp.s==='tor') T=torT; else if(sp.s==='ua') T=nearArm.UA; else if(sp.s==='fa') T=nearArm.FA; else if(sp.s==='th') T=nearLeg.TH; else if(sp.s==='sh') T=nearLeg.SH;
+    if(T){ svg+=hlSeg(sp,T); }
+    else if(sp.s==='delt'){ const c=add(J.S,dDown(P.ua||0),3.8); svg+=`<g>`+ell(c,6.4,5.6,-(P.ua||0)+90,sp.p===0?COL.musS:COL.mus,sp.p===0?COL.fiberS:COL.fiber,.45,.95)+`</g>`; }
+    else if(sp.s==='glute'){ svg+=ell(add(add(J.H,J.fn,-5.4),J.up,-1.2),4.6,7.4,P.tl,sp.p===0?COL.musS:COL.mus,sp.p===0?COL.fiberS:COL.fiber,.4,.9); }
+    else if(sp.s==='neck'){ svg+=lens(torT,0.74,1.0,'back',1.5,sp.p===0?COL.musS:COL.mus,sp.p===0?COL.fiberS:COL.fiber,.95); }
+  });
+  /* waistband */
+  svg+=`<path d="${tubePath(torT,0.15,0.165,0.35)}" fill="#3a3f50"/>`;
+  svg+=sc.front||'';
+  return svg;
+}
+
+/* ---- equipment helpers ---- */
+const E = {
+  rect:(x,y,w,h,r,fill,stroke)=>`<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" rx="${r||0}" fill="${fill}" ${stroke?`stroke="${stroke}" stroke-width=".6"`:''}/>`,
+  line:(a,b,col,w,cap)=>`<line x1="${f(a[0])}" y1="${f(a[1])}" x2="${f(b[0])}" y2="${f(b[1])}" stroke="${col}" stroke-width="${w}" stroke-linecap="${cap||'round'}"/>`,
+  circ:(c,r,fill,stroke)=>`<circle cx="${f(c[0])}" cy="${f(c[1])}" r="${r}" fill="${fill}" ${stroke?`stroke="${stroke}" stroke-width=".6"`:''}/>`,
+  poly:(pts,fill,stroke)=>`<path d="M${pts.map(P2).join(' L')}Z" fill="${fill}" ${stroke?`stroke="${stroke}" stroke-width=".6"`:''}/>`,
+  /* dumbbell: center c, bar direction angle (deg, 0 = horizontal) */
+  db:(c,ang,len,pl)=>{ len=len||13; pl=pl||5.2; const u=[Math.cos(ang*R),Math.sin(ang*R)], v=[-u[1],u[0]];
+     const a=add(c,u,-len/2), b=add(c,u,len/2); let s=E.line(a,b,COL.steelD,2.2,'butt');
+     [a,b].forEach((e,i)=>{ const s0=i?1:-1; const q=add(e,u,s0*1.4); s+=E.poly([add(add(q,u,-s0*1.8),v,-pl),add(add(q,u,s0*1.8),v,-pl),add(add(q,u,s0*1.8),v,pl),add(add(q,u,-s0*1.8),v,pl)],COL.steel,COL.steelD); });
+     return s; },
+  stack:(x,y,w,h)=>{ let s=E.rect(x,y,w,h,1.5,'#313a4f','#4a5670'); for(let i=0;i<7;i++){ s+=E.rect(x+2,y+3+i*((h-6)/7),w-4,(h-6)/7-1.2,1,'#6a7690'); } return s; },
+  pulley:(c,r)=>E.circ(c,r||3.4,COL.steel,COL.steelD)+E.circ(c,1.1,COL.steelD),
+  cable:(a,b)=>E.line(a,b,'#c9cfdb',.9,'butt'),
+  label:(x,y,t)=>`<text x="${x}" y="${y}" font-size="6" fill="#8e98ad" font-family="Inter,Arial,sans-serif">${t}</text>`
+};
+
+
+/* ---- front-view figure (for movements where the arms move sideways) ---- */
+function renderFront(P, spec, scene, opt){
+  const ab=P.b===undefined?9:P.b, ebend=P.e===undefined?10:P.e;
+  const cx=100, hipY=69, shY=38, sx=20.5;
+  let svg=`<rect x="0" y="130" width="200" height="10" fill="${COL.floor}"/><line x1="0" y1="130.4" x2="200" y2="130.4" stroke="#39425a" stroke-width=".8"/><ellipse cx="100" cy="130.6" rx="30" ry="2.2" fill="#000" opacity=".28"/>`;
+  const mir=[1,-1];
+  /* legs */
+  mir.forEach(m=>{ const hp=[cx+m*6.6,hipY+1], kn=[cx+m*8.2,97], an=[cx+m*9.2,124];
+    const nT=[1,0];
+    const TH=tube(hp,kn,nT,t=>lin(8.6,5.8,t)+1.2*bump(t,.3,.25),t=>lin(8.6,5.8,t)+1.2*bump(t,.3,.25));
+    const SH=tube(kn,an,nT,t=>lin(5.4,3.1,t)+2.4*bump(t,.25,.16),t=>lin(5.4,3.1,t)+2.4*bump(t,.25,.16));
+    svg+=`<path d="${tubePath(SH)}" fill="${COL.skin}" stroke="${COL.line}" stroke-width=".5"/><circle cx="${f(kn[0])}" cy="${f(kn[1])}" r="5" fill="${COL.skin}"/><path d="${tubePath(TH)}" fill="${COL.skin}" stroke="${COL.line}" stroke-width=".5"/>`;
+    svg+=`<path d="${tubePath(TH,0,0.55,0.9)}" fill="${COL.short}"/>`;
+    svg+=`<ellipse cx="${f(an[0]+m*1.2)}" cy="127" rx="6.2" ry="3.4" fill="${COL.shoe}" stroke="#14161d" stroke-width=".5"/>`;
+  });
+  /* torso */
+  const tp=[[cx-5.5,33],[cx-20.5,38.6],[cx-19.2,49],[cx-17.2,58],[cx-12.4,67],[cx-14,70],[cx+14,70],[cx+12.4,67],[cx+17.2,58],[cx+19.2,49],[cx+20.5,38.6],[cx+5.5,33]];
+  svg+=`<path d="${smooth(tp,true)}" fill="${COL.skin}" stroke="${COL.line}" stroke-width=".5"/>`;
+  svg+=`<path d="M${cx} 40 L${cx} 66" stroke="#a98772" stroke-width=".5" opacity=".55"/><path d="M${cx-17} 52 Q${cx-8} 56 ${cx} 53 Q${cx+8} 56 ${cx+17} 52" fill="none" stroke="#a98772" stroke-width=".55" opacity=".6"/>`;
+  svg+=`<path d="M${cx-14.2} 62 L${cx+14.2} 62 L${cx+14.8} 71 L${cx-14.8} 71Z" fill="${COL.short}"/>`;
+  /* neck + head */
+  svg+=`<rect x="${cx-3.8}" y="27" width="7.6" height="8" rx="2" fill="${COL.skin}"/>`;
+  svg+=ell([cx,21.5],7.3,8.6,0,COL.hair,null)+ell([cx,22.6],6.2,7.6,0,COL.skin,COL.line,.45);
+  svg+=`<circle cx="${cx-2.4}" cy="22" r=".7" fill="#2a2420"/><circle cx="${cx+2.4}" cy="22" r=".7" fill="#2a2420"/><path d="M${cx} 23 L${cx-.8} 26 L${cx+.8} 26" fill="none" stroke="${COL.line}" stroke-width=".45"/>`;
+  /* arms */
+  const hlS=(spec&&spec.hl)||[]; let arms='', hls='';
+  mir.forEach(m=>{
+    const S=[cx+m*sx,40.6], a1=m*ab, a2=m*(ab-ebend*(ab>20?1:0.2));
+    const E_=add(S,dDown(a1),LEN.ua), W_=add(E_,dDown(a2),LEN.fa);
+    const nU=[Math.cos(a1*R),-Math.sin(a1*R)], nF=[Math.cos(a2*R),-Math.sin(a2*R)];
+    const UA=tube(S,E_,nU,PRO.ua.f,PRO.ua.f), FA=tube(E_,W_,nF,PRO.fa.f,PRO.fa.f);
+    arms+=`<path d="${tubePath(FA)}" fill="${COL.skin}" stroke="${COL.line}" stroke-width=".5"/><circle cx="${f(E_[0])}" cy="${f(E_[1])}" r="4.2" fill="${COL.skin}"/><path d="${tubePath(UA)}" fill="${COL.skin}" stroke="${COL.line}" stroke-width=".5"/>`;
+    arms+=ell(add(S,dDown(a1),3.6),6.2,5.5,90-a1,COL.skin,COL.line,.45);
+    arms+=`<circle cx="${f(W_[0])}" cy="${f(W_[1]+1.5)}" r="3.2" fill="${COL.skin}"/>`;
+    hlS.forEach(sp=>{ if(sp.s==='delt') hls+=ell(add(S,dDown(a1),4.2),6.6,5.2,90-a1,sp.p===0?COL.musS:COL.mus,sp.p===0?COL.fiberS:COL.fiber,.45,.95); });
+    arms+=plate(add(W_,dDown(a2),4.2),4.3);
+  });
+  svg+=arms;
+  hlS.forEach(sp=>{ if(sp.s==='neck'){ mir.forEach(m=>{ const T=tube([cx+m*5,33.4],[cx+m*17.5,38.6],[0,-1],()=>3.4,()=>3.4,6); svg+=lens(T,0.04,0.98,'both',1.15,sp.p===0?COL.musS:COL.mus,sp.p===0?COL.fiberS:COL.fiber,.95); }); } });
+  svg+=hls;
+  return svg;
+}
+function plate(c,r){ return E.circ(c,r,COL.steel,COL.steelD)+E.circ(c,1.1,COL.steelD)+E.circ(c,r*0.55,'none',COL.steelD); }
+
+/* interpolate two poses */
+function lerpPose(A,B,k){ const o={}; const keys=new Set(Object.keys(A).concat(Object.keys(B)));
+  keys.forEach(key=>{ const a=A[key], b=B[key];
+    if(Array.isArray(a)||Array.isArray(b)){ const aa=a||b, bb=b||a; o[key]=[lin(aa[0],bb[0],k),lin(aa[1],bb[1],k)]; }
+    else if(a===undefined) o[key]=b; else if(b===undefined) o[key]=a; else o[key]=lin(a,b,k); });
+  return o; }
+
+const api = {EX:{}, defs:`<defs>
+<linearGradient id="gSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6cbb6"/><stop offset="1" stop-color="#c3a28c"/></linearGradient>
+<linearGradient id="gMus" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0554a"/><stop offset="1" stop-color="#c9302c"/></linearGradient>
+<linearGradient id="gMusS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f5a04e"/><stop offset="1" stop-color="#dd7f2c"/></linearGradient>
+</defs>`, E, COL, LEN, add, dDown, ell, lens, tube, tubePath, smooth, fk, render, lerpPose, P2, f, R};
+api.has = k => !!api.EX[k];
+api.frame = function(key,k){ const d=api.EX[key]; const P=lerpPose(d.A,d.B,k); return d.view==='front' ? renderFront(P,d,d.scene,{k}) : render(P,d,d.scene,{k}); };
+return api;
+})();
+
+
+/* ===== exercise definitions (poses are joint angles, see engine.js) ===== */
+(function(F){
+const {E,COL,add,dDown} = F;
+const R = Math.PI/180;
+const plate = (c,r)=> E.circ(c,r||5.6,COL.steel,COL.steelD)+E.circ(c,1.2,COL.steelD)+E.circ(c,(r||5.6)*0.55,'none',COL.steelD);
+const post = (x,y0,y1)=>E.rect(x,y0,4,y1-y0,1.5,'#39435a','#55627d');
+const floorBlock=(x,y,w,h)=>E.rect(x,y,w,h,2,'#3a4560','#55627d');
+function hl(s,a,b,side,p,k,extra){ return Object.assign({s,a,b,side,p,k},extra||{}); }
+
+const X = F.EX;
+
+/* ---- LEG PRESS ---- */
+X.legpress = {label:'Quads, glutes, hamstrings', period:3.0, thumbK:0.2,
+  A:{hx:58,hy:104,tl:-50,hn:8,ua:35,fa:85,th:158,sh:62,ft:25},
+  B:{hx:58,hy:104,tl:-50,hn:8,ua:35,fa:85,th:150,sh:138,ft:-55},
+  hl:[hl('th',.08,.9,'front',1,1),hl('glute'),hl('th',.15,.85,'back',0,.8),hl('sh',.1,.6,'back',0,.8)].map((h,i)=>i==1?{s:'glute',p:1}:h),
+  scene:(J,P,k)=>{ const A=J.leg.A, nrm=[Math.cos(40*R),-Math.sin(40*R)];
+    let b=''; // seat + back pad + sled rails
+    b+=E.line([20,128],[150,36],'#39435a',3.2);
+    b+=E.line([34,132],[34,112],'#39435a',2.5);
+    b+=E.line([J.H[0]-14,J.H[1]+14],[J.H[0]+10,J.H[1]+14],COL.pad,6);
+    b+=E.line(add(J.H,J.fn,-11),add(add(J.H,J.fn,-11),J.up,40),COL.pad,6);
+    let fr='';
+    const plateC=add(A,[0.57,-0.82],3.5);
+    fr+=E.line(add(plateC,[0.82,0.57],-14),add(plateC,[0.82,0.57],14),COL.steelD,3.4);
+    fr+=E.line(add(plateC,[0.82,0.57],14),add(plateC,[0.57,-0.82],-16),'#39435a',1.6);
+    return {back:b,front:fr}; } };
+
+/* ---- CHEST PRESS (machine) ---- */
+X.chestpress = {label:'Chest, front shoulders, triceps', period:2.6, thumbK:0.8,
+  A:{pinA:[116,124],tl:-6,hn:6,ua:-72,fa:92,th:90,sh:0,ft:0},
+  B:{pinA:[116,124],tl:-6,hn:6,ua:82,fa:88,th:90,sh:0,ft:0},
+  hl:[hl('tor',.5,.9,'front',1,1),{s:'delt',p:1},hl('ua',.2,.85,'back',0,.9)],
+  scene:(J)=>{ const W=J.arm.W; let b='';
+    b+=E.stack(14,40,26,90);
+    b+=E.line([40,44],[W[0]-30,W[1]-8],'#39435a',3);
+    b+=E.rect(J.H[0]-16,J.H[1]+8,34,7,3,COL.pad);
+    b+=E.line(add(J.H,J.fn,-11),add(add(J.H,J.fn,-11),J.up,42),COL.pad,6);
+    b+=post(J.H[0]-24,J.H[1]+14,130);
+    let f=E.line([W[0]+1,W[1]-9],[W[0]+1,W[1]+9],COL.steel,2.8)+E.line([W[0]-30,W[1]-8],[W[0]+1,W[1]],'#4a5670',3);
+    return {back:b,front:f}; } };
+
+/* ---- INCLINE PRESS (dumbbells) ---- */
+X.inclinepress = {label:'Upper chest, front shoulders, triceps', period:2.8, thumbK:0.8,
+  A:{hx:96,hy:92,tl:-50,hn:10,ua:30,fa:165,th:80,sh:-4,ft:0},
+  B:{hx:96,hy:92,tl:-50,hn:10,ua:150,fa:155,th:80,sh:-4,ft:0},
+  hl:[hl('tor',.52,.92,'front',1,1),{s:'delt',p:1},hl('ua',.2,.85,'back',0,.9)],
+  scene:(J)=>{ const W=J.arm.W; let b='';
+    b+=E.line(add(J.H,J.fn,-11.5),add(add(J.H,J.fn,-11.5),J.up,44),COL.pad,7);
+    b+=E.rect(J.H[0]-14,J.H[1]+9,36,7,3,COL.pad);
+    b+=post(J.H[0]-2,J.H[1]+16,130)+post(J.H[0]+20,J.H[1]+16,130);
+    return {back:b,front:plate(add(W,dDown(J.arm.a2),5),5.6)}; } };
+
+/* ---- DUMBBELL PRESS (flat bench) ---- */
+X.dbpress = {label:'Chest, front shoulders, triceps', period:2.8, thumbK:0.8,
+  A:{hx:130,hy:102,tl:-90,hn:0,ua:22,fa:184,th:100,sh:20,ft:0},
+  B:{hx:130,hy:102,tl:-90,hn:0,ua:178,fa:180,th:100,sh:20,ft:0},
+  hl:[hl('tor',.5,.92,'front',1,1),{s:'delt',p:1},hl('ua',.2,.85,'back',0,.9)],
+  scene:(J)=>{ const W=J.arm.W; let b='';
+    b+=E.rect(80,113,84,8,3,COL.pad);
+    b+=post(92,121,130)+post(150,121,130);
+    return {back:b,front:plate(add(W,dDown(J.arm.a2),5),5.6)}; } };
+
+/* ---- LAT PULLDOWN ---- */
+X.latpulldown = {label:'Lats, biceps, rear shoulders', period:3.0, thumbK:0.8,
+  A:{pinA:[116,124],tl:0,hn:-4,ua:168,fa:172,th:92,sh:0,ft:0},
+  B:{pinA:[116,124],tl:-12,hn:2,ua:-12,fa:148,th:92,sh:0,ft:0},
+  hl:[hl('tor',.28,.9,'back',1,1.15),hl('ua',.2,.85,'front',0,.9),hl('fa',.1,.6,'both',0,.8),{s:'delt',p:0}],
+  scene:(J)=>{ const W=J.arm.W; let b='';
+    b+=E.stack(150,16,26,114);
+    b+=post(124,14,130);
+    b+=E.line([126,16],[150,16],'#39435a',3);
+    b+=E.pulley([98,12],4);
+    b+=E.line([98,12],[126,16],'#39435a',2.2);
+    b+=E.rect(J.H[0]-16,J.H[1]+8,36,7,3,COL.pad);
+    b+=post(J.H[0]-14,J.H[1]+14,130);
+    b+=E.rect(J.H[0]+10,J.H[1]-12,30,6,3,COL.padL);
+    b+=E.cable([98,12],[W[0]+1,W[1]-2]);
+    return {back:b,front:E.circ([W[0]+1.5,W[1]-1.5],2.8,COL.steel,COL.steelD)}; } };
+
+/* ---- CABLE ROW ---- */
+X.cablerow = {label:'Lats, mid-back, biceps', period:3.0, thumbK:0.8,
+  A:{hx:68,hy:100,tl:14,hn:-8,ua:86,fa:88,th:86,sh:98,ft:-70},
+  B:{hx:68,hy:100,tl:-10,hn:2,ua:-62,fa:94,th:86,sh:98,ft:-70},
+  hl:[hl('tor',.3,.88,'back',1,1.15),hl('ua',.2,.85,'front',0,.9),hl('fa',.1,.6,'both',0,.8),{s:'delt',p:0}],
+  scene:(J)=>{ const W=J.arm.W, A=J.leg.A; let b='';
+    b+=E.stack(158,30,26,100);
+    b+=E.rect(J.H[0]-14,J.H[1]+9,34,7,3,COL.pad);
+    b+=post(J.H[0]-6,J.H[1]+15,130);
+    b+=E.line([A[0]+8,A[1]-14],[A[0]+8,A[1]+16],COL.pad,5);
+    b+=post(A[0]+4,A[1]+16,130);
+    b+=E.line([A[0]+10,A[1]+12],[158,A[1]+12],'#39435a',2.5);
+    b+=E.pulley([156,A[1]+12],3.2);
+    b+=E.cable([156,A[1]+12],[W[0]+2,W[1]]);
+    return {back:b,front:E.line([W[0]+2,W[1]-6],[W[0]+2,W[1]+6],COL.steel,2.8)}; } };
+
+/* ---- TRICEPS PUSHDOWN ---- */
+X.tricepspushdown = {label:'Triceps', period:2.4, thumbK:0.9,
+  A:{pinA:[96,124],tl:8,hn:-4,ua:10,fa:104,th:0,sh:0,ft:0},
+  B:{pinA:[96,124],tl:8,hn:-4,ua:6,fa:14,th:0,sh:0,ft:0},
+  hl:[hl('ua',.12,.9,'back',1,1.1),hl('fa',.1,.6,'both',0,.8)],
+  scene:(J)=>{ const W=J.arm.W; let b='';
+    b+=E.stack(160,16,24,114);
+    b+=post(132,12,130);
+    b+=E.line([134,14],[160,14],'#39435a',3);
+    b+=E.pulley([122,14],4);
+    b+=E.line([122,14],[134,14],'#39435a',2.2);
+    b+=E.cable([122,14],[W[0]+3,W[1]]);
+    return {back:b,front:E.line([W[0]+3,W[1]-4],[W[0]+9,W[1]+4],COL.steel,2.6)}; } };
+
+/* ---- LEG CURL (prone machine) ---- */
+X.legcurl = {label:'Hamstrings, calves', period:2.8, thumbK:0.9,
+  A:{hx:96,hy:102,tl:90,hn:-62,ua:104,fa:110,th:-90,sh:-90,ft:178},
+  B:{hx:96,hy:102,tl:90,hn:-62,ua:104,fa:110,th:-90,sh:-166,ft:240},
+  hl:[hl('th',.15,.9,'back',1,1.05),hl('sh',.1,.62,'back',0,.9),{s:'glute',p:0}],
+  scene:(J)=>{ const A=J.leg.A; let b='';
+    b+=E.rect(66,111,72,8,3,COL.pad);
+    b+=post(78,119,130)+post(124,119,130);
+    b+=E.stack(2,56,16,74);
+    b+=E.line([20,118],[A[0]-1,A[1]-2],'#4a5670',3);
+    b+=E.circ([A[0]-0.5,A[1]-3.4],4.2,COL.padL,'#55627d');
+    return {back:b,front:''}; } };
+
+/* ---- DUMBBELL / HAMMER CURL ---- */
+const curlScene=(neutral)=>(J)=>{ const W=J.arm.W; const c=add(W,dDown(J.arm.a2),4.5);
+  return {back:'',front: neutral? plate(c,5.4) : E.db(c,Math.atan2(dDown(J.arm.a2)[1],dDown(J.arm.a2)[0])/R+90,13,4.8)}; };
+X.dbcurl = {label:'Biceps, forearms', period:2.6, thumbK:0.85,
+  A:{pinA:[98,124],tl:2,hn:0,ua:4,fa:4,th:0,sh:0,ft:0},
+  B:{pinA:[98,124],tl:2,hn:0,ua:12,fa:150,th:0,sh:0,ft:0},
+  hl:[hl('ua',.12,.9,'front',1,1.1),hl('fa',.08,.6,'front',0,.9)], scene:curlScene(false)};
+X.hammercurl = {label:'Biceps, forearm (brachioradialis)', period:2.6, thumbK:0.85,
+  A:{pinA:[98,124],tl:2,hn:0,ua:4,fa:4,th:0,sh:0,ft:0},
+  B:{pinA:[98,124],tl:2,hn:0,ua:12,fa:150,th:0,sh:0,ft:0},
+  hl:[hl('ua',.12,.9,'front',0,1),hl('fa',.04,.55,'both',1,1.05)], scene:curlScene(true)};
+
+/* ---- OVERHEAD TRICEPS EXTENSION ---- */
+X.overheadtri = {label:'Triceps (long head)', period:2.8, thumbK:0.9,
+  A:{pinA:[100,124],tl:0,hn:0,ua:176,fa:-34,th:0,sh:0,ft:0},
+  B:{pinA:[100,124],tl:0,hn:0,ua:176,fa:176,th:0,sh:0,ft:0},
+  hl:[hl('ua',.1,.92,'back',1,1.15),hl('fa',.1,.6,'both',0,.8)],
+  scene:(J)=>({back:'',front:plate(add(J.arm.W,dDown(J.arm.a2),4.5),5.4)}) };
+
+/* ---- CALF RAISE (standing, on a step) ---- */
+X.calfraise = {label:'Calves', period:2.4, thumbK:0.95,
+  A:{pinT:[132,115.5],tl:0,hn:0,ua:4,fa:4,th:0,sh:0,ft:-16},
+  B:{pinT:[132,115.5],tl:0,hn:0,ua:4,fa:4,th:0,sh:0,ft:52},
+  hl:[hl('sh',.06,.66,'back',1,1.25),hl('sh',.55,.92,'both',0,.9)],
+  scene:(J)=>{ let b=E.rect(108,116,52,14,2,'#3a4560','#55627d')+E.line([158,60],[158,116],'#39435a',3)+E.line([150,60],[158,60],'#39435a',3);
+    return {back:b,front:''}; } };
+
+/* ---- FARMER'S CARRY ---- */
+X.farmercarry = {label:'Forearms/grip, traps, core, legs', period:1.8, thumbK:0.3,
+  A:{hx:100,hy:70,tl:2,hn:0,ua:3,fa:3,th:18,sh:-4,ft:-6,th2:-22,sh2:-38,ft2:48},
+  B:{hx:100,hy:70,tl:2,hn:0,ua:3,fa:3,th:-22,sh:-38,ft:48,th2:18,sh2:-4,ft2:-6},
+  hl:[hl('fa',.04,.95,'both',1,1.2),hl('neck'),hl('tor',.12,.52,'front',0,.9),{s:'glute',p:0},hl('th',.1,.85,'front',0,.7)].map((h,i)=>i==1?{s:'neck',p:1}:h),
+  scene:(J)=>{ const W=J.arm.W; return {back:'',front:plate(add(W,dDown(J.arm.a2),5.5),6.4)}; } };
+
+/* ---- ROMANIAN DEADLIFT ---- */
+X.rdl = {label:'Hamstrings, glutes, lower back', period:3.2, thumbK:0.8,
+  A:{pinA:[106,124],tl:3,hn:0,ua:8,fa:6,th:3,sh:-3,ft:0},
+  B:{pinA:[106,124],tl:68,hn:-28,ua:4,fa:2,th:30,sh:-4,ft:0},
+  hl:[hl('th',.08,.92,'back',1,1.1),{s:'glute',p:1},hl('tor',.04,.7,'back',1,1.0),hl('fa',.1,.9,'both',0,.7)],
+  scene:(J)=>({back:'',front:plate(add(J.arm.W,dDown(J.arm.a2),5),7.4)}) };
+
+/* ---- SINGLE-ARM ROW ---- */
+X.singlearmrow = {label:'Lats, mid-back, biceps', period:2.8, thumbK:0.85,
+  A:{pinA:[60,124],tl:76,hn:-34,ua:0,fa:0,th:-26,sh:-4,ft:0,ua2:0,fa2:0,th2:42,sh2:-92,ft2:180},
+  B:{pinA:[60,124],tl:76,hn:-34,ua:-78,fa:-8,th:-26,sh:-4,ft:0,ua2:0,fa2:0,th2:42,sh2:-92,ft2:180},
+  hl:[hl('tor',.3,.88,'back',1,1.15),hl('ua',.2,.85,'front',0,.9),hl('fa',.1,.6,'both',0,.8),{s:'delt',p:0}],
+  scene:(J)=>{ const W=J.arm.W; let b=E.rect(86,104,60,9,3,COL.pad)+post(94,113,130)+post(136,113,130);
+    return {back:b,front:plate(add(W,dDown(J.arm.a2),5),5.4)}; } };
+
+/* ---- STEP-UP ---- */
+X.stepup = {label:'Quads, glutes, hamstrings', period:3.0, thumbK:0.7,
+  A:{pinA:[122,100],tl:6,hn:0,ua:4,fa:4,th:80,sh:-10,ft:0,th2:-12,sh2:-4,ft2:0},
+  B:{pinA:[122,100],tl:0,hn:0,ua:4,fa:4,th:0,sh:0,ft:0,th2:74,sh2:-6,ft2:8},
+  hl:[hl('th',.08,.9,'front',1,1),{s:'glute',p:1},hl('th',.15,.85,'back',0,.8),hl('sh',.1,.6,'back',0,.8)],
+  scene:(J)=>({back:E.rect(100,106,50,24,2,'#3a4560','#55627d'),front:''}) };
+
+/* ---- DEAD BUG ---- */
+X.deadbug = {label:'Abs, hip flexors', period:3.0, thumbK:0.5,
+  A:{hx:122,hy:105,tl:-90,hn:0,ua:180,fa:180,th:180,sh:90,ft:-70},
+  B:{hx:122,hy:105,tl:-90,hn:0,ua:-92,fa:-92,th:180,sh:90,ft:-70,ua2:180,fa2:180,th2:99,sh2:99,ft2:-70},
+  hl:[hl('tor',.1,.65,'front',1,1.1),hl('th',.05,.45,'front',0,.9)],
+  scene:()=>({back:E.rect(30,116,150,5,2,COL.pad)+E.line([30,121],[180,121],'#39435a',1),front:''}) };
+
+/* ---- PLANK ---- */
+X.plank = {label:'Abs, shoulders, glutes', period:3.2, thumbK:0.5,
+  A:{pinT:[44,128.4],tl:79,hn:-30,ua:0,fa:90,th:-84,sh:-84,ft:74},
+  B:{pinT:[44,128.4],tl:81,hn:-30,ua:0,fa:90,th:-84,sh:-84,ft:74},
+  hl:[hl('tor',.1,.7,'front',1,1.1),{s:'delt',p:0},{s:'glute',p:0},hl('th',.1,.85,'front',0,.8)],
+  scene:()=>({back:E.rect(20,129,150,2,1,COL.pad),front:''}) };
+
+/* ---- TREADMILL CARDIO / WALK ---- */
+const runA={hx:100,hy:70,tl:8,hn:0,ua:-34,fa:62,th:30,sh:6,ft:-4,ua2:42,fa2:104,th2:-28,sh2:-72,ft2:62};
+const runB={hx:100,hy:70,tl:8,hn:0,ua:42,fa:104,th:-28,sh:-72,ft:62,ua2:-34,fa2:62,th2:30,sh2:6,ft2:-4};
+const walkA={hx:100,hy:70,tl:3,hn:0,ua:-22,fa:24,th:20,sh:-3,ft:-6,ua2:24,fa2:40,th2:-18,sh2:-32,ft2:42};
+const walkB={hx:100,hy:70,tl:3,hn:0,ua:24,fa:40,th:-18,sh:-32,ft:42,ua2:-22,fa2:24,th2:20,sh2:-3,ft2:-6};
+const tread=()=>({back:E.rect(34,128,132,5,2,'#2b3246','#55627d')+post(162,52,128)+E.rect(154,44,22,10,3,'#39435a','#55627d'),front:''});
+X.cardio = {label:'Legs, glutes, heart & lungs', period:0.9, thumbK:0.2, A:runA, B:runB, scene:tread,
+  hl:[hl('th',.08,.9,'front',1,1),{s:'glute',p:1},hl('sh',.1,.6,'back',1,1),hl('th',.15,.85,'back',0,.8)]};
+X.walk = {label:'Legs, glutes, heart & lungs', period:1.4, thumbK:0.2, A:walkA, B:walkB, scene:()=>({back:'',front:''}),
+  hl:[hl('th',.08,.9,'front',0,1),{s:'glute',p:0},hl('sh',.1,.6,'back',1,1)]};
+
+/* ---- HIP FLEXOR STRETCH (kneeling lunge) ---- */
+X.stretch = {label:'Hip flexors, quads', period:3.6, thumbK:0.8,
+  A:{pinA:[124,124],tl:0,hn:0,ua:20,fa:28,th:90,sh:0,ft:0,th2:-11,sh2:-90,ft2:180},
+  B:{pinA:[124,124],tl:-4,hn:0,ua:20,fa:28,th:82,sh:-12,ft:0,th2:-17,sh2:-90,ft2:180},
+  hl:[hl('th',.0,.55,'front',1,1.2,{far:true}),hl('th',.1,.8,'front',0,.8,{near:true})].map((h,i)=>i==1?{s:'glute',p:0}:h),
+  scene:()=>({back:'',front:''}) };
+
+/* ---- REST ---- */
+X.rest = {label:'Recovery', period:4.0, thumbK:0.5,
+  A:{hx:128,hy:104,tl:-90,hn:0,ua:90,fa:92,th:90,sh:90,ft:-78},
+  B:{hx:128,hy:104,tl:-90,hn:0,ua:90,fa:92,th:90,sh:90,ft:-78},
+  hl:[],
+  scene:()=>({back:E.rect(20,114,160,10,3,'#3a4560')+E.rect(20,124,160,6,2,'#2a3248')+E.rect(60,100,28,13,5,'#66728b'),
+    front:E.label(150,70,'z')+`<text x="158" y="58" font-size="9" fill="#8e98ad" font-family="Inter,Arial,sans-serif">z</text><text x="168" y="44" font-size="12" fill="#8e98ad" font-family="Inter,Arial,sans-serif">z</text>`}) };
+
+/* ---- LATERAL RAISE (front view) ---- */
+X.lateralraise = {view:'front', period:2.6, thumbK:0.9,
+  A:{b:9,e:6}, B:{b:86,e:12},
+  hl:[{s:'delt',p:1},{s:'neck',p:0}], scene:null};
+
+/* ---- framing + legend text ---- */
+const META = {
+ legpress:{vb:[4,24,170,115],main:'Quads · Glutes',help:'Hamstrings · Calves'},
+ chestpress:{vb:[4,28,142,108],main:'Chest',help:'Front shoulders · Triceps'},
+ inclinepress:{vb:[34,26,140,110],main:'Upper chest · Front shoulders',help:'Triceps'},
+ dbpress:{vb:[56,30,130,108],main:'Chest · Front shoulders',help:'Triceps'},
+ latpulldown:{vb:[56,0,128,138],main:'Lats',help:'Biceps · Rear shoulders · Forearms'},
+ cablerow:{vb:[18,26,170,110],main:'Lats · Mid-back',help:'Biceps · Rear shoulders · Forearms'},
+ tricepspushdown:{vb:[62,0,126,138],main:'Triceps',help:'Forearms'},
+ legcurl:{vb:[0,42,190,96],main:'Hamstrings',help:'Calves · Glutes'},
+ dbcurl:{vb:[52,-8,96,144],main:'Biceps',help:'Forearms'},
+ hammercurl:{vb:[52,-8,96,144],main:'Forearms (brachioradialis)',help:'Biceps'},
+ overheadtri:{vb:[50,-14,100,152],main:'Triceps (long head)',help:'Forearms'},
+ calfraise:{vb:[62,-6,112,142],main:'Calves',help:'Soleus (deep calf)'},
+ farmercarry:{vb:[52,-8,96,144],main:'Forearms & grip · Traps',help:'Core · Glutes · Thighs'},
+ rdl:{vb:[44,-6,112,140],main:'Hamstrings · Glutes · Lower back',help:'Forearms'},
+ singlearmrow:{vb:[26,30,136,108],main:'Lats · Mid-back',help:'Biceps · Rear shoulder · Forearm'},
+ stepup:{vb:[58,-10,112,148],main:'Quads · Glutes',help:'Hamstrings · Calves'},
+ deadbug:{vb:[16,38,174,96],main:'Abs',help:'Hip flexors'},
+ plank:{vb:[10,58,176,76],main:'Abs',help:'Shoulders · Glutes · Thighs'},
+ cardio:{vb:[26,-6,150,142],main:'Quads · Glutes · Calves',help:'Hamstrings · Heart & lungs'},
+ walk:{vb:[46,-6,110,142],main:'Calves',help:'Quads · Glutes · Heart & lungs'},
+ stretch:{vb:[30,28,134,110],main:'Hip flexors (front of the back hip)',help:'Glutes'},
+ rest:{vb:[10,34,184,104],main:'Recovery — nothing to work',help:''},
+ lateralraise:{vb:[30,-6,140,142],main:'Side shoulders (medial deltoid)',help:'Upper traps'}
+};
+Object.keys(META).forEach(k=>Object.assign(X[k],META[k]));
+Object.keys(X).forEach(k=>{ delete X[k].label; });
+})(FIG);
+
+
+
+/* ---------- exercise instruction library ---------- */
+const EX = {
+  warmup: {name:"Warm-up", icon:"ic-cardio", equip:"Bodyweight, no equipment", log:"none", detail:{setup:"5-8 minutes before any lifting day.", execution:"Arm circles (20s each direction), leg swings (10 each leg, each direction), 15 bodyweight squats, 6 reverse lunges each leg, band pull-aparts if available (15 reps).", breathing:"Relaxed, natural breathing.", mistake:"Skipping it because it feels unnecessary. Evidence that warm-ups prevent injury comes from team sports, but it's quick and gets you ready."}},
+  legpress: {name:"Leg Press", icon:"ic-legpress", equip:"Leg press machine", log:"weight", detail:{setup:"Sit in the machine, feet shoulder-width on the platform, mid-foot position, back flat against the pad.", execution:"Lower the platform until knees reach about 90°, then press through your heels back to start. Don't lock knees fully at the top.", breathing:"Inhale on the way down, exhale as you press up.", mistake:"Letting knees cave inward — keep them tracking over your toes."}},
+  chestpress: {name:"Chest Press", icon:"ic-chestpress", equip:"Chest press machine", log:"weight", detail:{setup:"Adjust seat so the handles sit at mid-chest height.", execution:"Press forward until arms extend (not locked), return slowly to start.", breathing:"Exhale on the push, inhale on the return.", mistake:"Flaring elbows straight out to the sides — keep them at roughly 45° from your torso."}},
+  pushup: {name:"Push-Up", icon:"ic-pushup", equip:"Bodyweight (bench optional, for incline)", log:"reps", detail:{setup:"Hands slightly wider than shoulders, body in a straight line head to heels. Use an incline (bench) if a full push-up is too hard yet.", execution:"Lower your chest toward the floor, elbows at ~45°, push back to full extension.", breathing:"Inhale down, exhale up.", mistake:"Letting the hips sag — brace your core so your body stays one straight line."}},
+  latpulldown: {name:"Lat Pulldown", icon:"ic-latpulldown", equip:"Lat pulldown machine", log:"weight", detail:{setup:"Grip the bar wider than shoulder-width, thighs secured under the pad.", execution:"Pull the bar down to your upper chest, leading with your elbows, control it back up.", breathing:"Exhale as you pull down, inhale on the return.", mistake:"Leaning back too far and using momentum instead of your back muscles."}},
+  facepull: {name:"Face Pull", icon:"ic-facepull", equip:"Cable machine + rope attachment", log:"weight", detail:{setup:"Cable at upper-chest to head height, rope attachment, step back for tension.", execution:"Pull the rope toward your face, elbows flaring wide, squeeze shoulder blades together.", breathing:"Exhale as you pull, inhale on release.", mistake:"Using too much weight and turning it into a row instead of a pull to face height."}},
+  shoulderpress: {name:"Shoulder Press", icon:"ic-shoulderpress", equip:"Shoulder press machine", log:"weight", detail:{setup:"Machine seat adjusted so handles start at shoulder height.", execution:"Press straight up until arms extend, lower back with control.", breathing:"Exhale on the press up, inhale on the way down.", mistake:"Arching your lower back to help push the weight — keep your back flat on the pad."}},
+  plank: {name:"Plank", icon:"ic-plank", equip:"Bodyweight, no equipment", log:"reps", detail:{setup:"Forearms on the floor, elbows under shoulders, legs extended, toes down.", execution:"Hold a straight line from head to heels for the target time.", breathing:"Steady, normal breathing — don't hold your breath.", mistake:"Letting hips sag or pike up — think 'straight board', not a V or a U."}},
+  cardio_mod: {name:"Moderate cardio", icon:"ic-cardio", equip:"Treadmill, bike, or elliptical", log:"none", detail:{setup:"Treadmill, bike, or elliptical — whichever is comfortable on your joints today.", execution:"Keep a pace where you could still hold a conversation.", breathing:"Steady, not gasping.", mistake:"Going too hard too soon — this session should be repeatable, not a sprint."}},
+  deadbug: {name:"Dead Bug", icon:"ic-deadbug", equip:"Bodyweight, no equipment", log:"reps", detail:{setup:"Lie on your back, arms reaching up, knees bent 90° above your hips.", execution:"Lower one arm and the opposite leg toward the floor without your lower back lifting, return, alternate.", breathing:"Exhale as you extend the limbs.", mistake:"Letting your lower back arch off the floor — keep it pressed down throughout."}},
+  bicyclecrunch: {name:"Bicycle Crunch", icon:"ic-bicyclecrunch", equip:"Bodyweight, no equipment", log:"reps", detail:{setup:"Lie on your back, hands lightly behind your head, knees bent.", execution:"Bring opposite elbow to opposite knee in a pedaling motion.", breathing:"Exhale on each crunch.", mistake:"Pulling on your neck — let your abs do the work, hands just support your head."}},
+  rdl: {name:"Romanian Deadlift", icon:"ic-hinge", equip:"Dumbbells or barbell", log:"weight", detail:{setup:"Stand feet hip-width, dumbbells or barbell in front of your thighs.", execution:"Push hips back with a slight knee bend, lower the weight along your legs until you feel a hamstring stretch, drive hips forward to stand.", breathing:"Inhale on the way down, exhale as you stand.", mistake:"Rounding the lower back — keep your chest up and back flat throughout."}},
+  inclinepress: {name:"Incline Press", icon:"ic-inclinepress", equip:"Incline bench + dumbbells or barbell", log:"weight", detail:{setup:"Bench at a slight incline (~30°), dumbbells or barbell at chest height.", execution:"Press up and slightly back until arms extend, lower with control.", breathing:"Exhale on the press, inhale on the way down.", mistake:"Setting the incline too steep — that turns it into a shoulder press instead."}},
+  chestfly: {name:"Chest Fly", icon:"ic-fly", equip:"Cable machine or dumbbells", log:"weight", detail:{setup:"Cable handles or dumbbells at chest height, slight bend in the elbows.", execution:"Bring hands together in front of your chest in a wide arc, return slowly.", breathing:"Exhale as hands come together, inhale on the way out.", mistake:"Bending the elbows too much — that turns it into a press. Keep the arc wide."}},
+  cablerow: {name:"Cable Row", icon:"ic-cablerow", equip:"Cable row machine", log:"weight", detail:{setup:"Sit with feet on the platform, knees slightly bent, grab the handle.", execution:"Pull the handle to your torso, squeeze shoulder blades together, extend arms back out.", breathing:"Exhale as you pull, inhale on the return.", mistake:"Rounding your back to get more pull — keep your torso upright and stable."}},
+  lateralraise: {name:"Lateral Raise", icon:"ic-lateralraise", equip:"Light dumbbells", log:"weight", detail:{setup:"Stand holding light dumbbells at your sides.", execution:"Raise arms out to the sides to roughly shoulder height, lower with control.", breathing:"Exhale as you raise, inhale on the way down.", mistake:"Swinging the weight up with momentum — go lighter and control it."}},
+  sideplank: {name:"Side Plank", icon:"ic-sideplank", equip:"Bodyweight, no equipment", log:"reps", detail:{setup:"Lie on your side, forearm under your shoulder, legs stacked.", execution:"Lift your hips until your body forms a straight line, hold.", breathing:"Steady, normal breathing.", mistake:"Letting the hips drop toward the floor — keep them lifted the whole hold."}},
+  twist: {name:"Cable Woodchop / Russian Twist", icon:"ic-twist", equip:"Cable machine or a light weight", log:"weight", detail:{setup:"Cable at chest height (or hold a light weight for Russian Twist), feet shoulder-width.", execution:"Rotate your torso to pull the cable/weight diagonally across your body, controlled, then return.", breathing:"Exhale on the rotation.", mistake:"Moving fast on momentum instead of a controlled rotation — slow it down."}},
+  walkswim: {name:"Walk or swim", icon:"ic-swim", equip:"Treadmill/outdoors, or the pool", log:"none", detail:{setup:"Comfortable shoes or swimwear, easy environment.", execution:"Keep the effort genuinely easy — this is recovery, not training.", breathing:"Relaxed, natural.", mistake:"Turning 'easy recovery' into another hard session — resist pushing the pace."}},
+  stretch: {name:"Stretch / mobility", icon:"ic-stretch", equip:"Mat, no equipment", log:"none", detail:{setup:"Mat or open floor space.", execution:"Start with the hip flexors: kneel on one knee with the other foot flat in front, and gently push your hips forward until you feel the front of the back hip stretch (20–30 seconds each side). Then hamstrings, quads, chest and shoulders, 20–30 seconds each.", breathing:"Slow, deep breaths into each stretch.", mistake:"Arching your lower back to fake the range in the hip stretch — push from the hips, not the spine. And no bouncing."}},
+  hipflexor: {name:"Hip Flexor Stretch", icon:"ic-stretch", equip:"Mat, no equipment", log:"none", detail:{setup:"Kneel on one knee (back knee down), front foot flat on the floor, front knee bent at 90°.", execution:"Gently push your hips forward until you feel a stretch at the front of the back hip, keep your torso upright.", breathing:"Slow, deep breaths, hold 20-30 seconds each side.", mistake:"Arching your lower back to fake the range — push from the hips, not the spine. Long hours of sitting can leave the hips tight, which some people notice as lower-back rounding when they hinge."}},
+  legcurl: {name:"Leg Curl", icon:"ic-hinge", equip:"Leg curl machine (lying or seated)", log:"weight", detail:{setup:"Adjust the pad so it sits just above your heels. Lie face down (or sit) with your knees lined up with the machine's pivot.", execution:"Curl your heels toward your glutes, squeeze the back of your thighs, then lower slowly over 2–3 seconds.", breathing:"Exhale curling up, inhale lowering.", mistake:"Lifting your hips off the pad to cheat the weight up — keep your hips down."}},
+  stepup: {name:"Step-Up / Leg Extension", icon:"ic-stepup", equip:"Bench/box, or leg extension machine", log:"weight", detail:{setup:"A sturdy bench/box, or the leg extension machine adjusted to your leg length.", execution:"Step up fully onto the platform, or extend legs fully on the machine, lower with control.", breathing:"Exhale on the effort, inhale on the return.", mistake:"Pushing off the back leg on step-ups instead of driving through the front leg."}},
+  dbpress: {name:"Dumbbell Press", icon:"ic-dbpress", equip:"Flat bench + dumbbells", log:"weight", detail:{setup:"Lie on a flat bench, dumbbells at chest height.", execution:"Press up until arms extend, lower with control back to chest level.", breathing:"Exhale on the press, inhale on the way down.", mistake:"Letting the dumbbells drift forward or back — keep them stacked over your chest."}},
+  singlearmrow: {name:"Single-Arm Row", icon:"ic-singlearmrow", equip:"Bench + dumbbell", log:"weight", detail:{setup:"One knee and hand on a bench, opposite foot on the floor, dumbbell in the free hand.", execution:"Pull the dumbbell to your hip, squeezing your back, lower with control.", breathing:"Exhale as you pull, inhale on the way down.", mistake:"Twisting your torso to help lift — keep your body square to the bench."}},
+  frontraise: {name:"Front Raise", icon:"ic-frontraise", equip:"Light dumbbells", log:"weight", detail:{setup:"Stand holding light dumbbells in front of your thighs.", execution:"Raise arms straight out in front to shoulder height, lower with control.", breathing:"Exhale as you raise, inhale on the way down.", mistake:"Swinging the weight using your back — keep it slow and controlled."}},
+  cardio_long: {name:"Mixed cardio", icon:"ic-cardio", equip:"Treadmill, bike, or pool", log:"none", detail:{setup:"Treadmill, bike, or pool.", execution:"Mix modes if you like — steady effort throughout, conversational pace.", breathing:"Steady, controlled.", mistake:"Front-loading all the effort in the first 10 minutes then fading — pace yourself."}},
+  rest: {name:"Full rest", icon:"ic-rest", equip:"—", log:"none", detail:{setup:"No gym today.", execution:"Let the body recover. Optional easy walk if you feel like moving.", breathing:"—", mistake:"Filling a rest day with extra training — recovery is part of the program, not a skip."}},
+  tricepspushdown: {name:"Triceps Pushdown", icon:"ic-pushdown", equip:"Cable machine + rope or short bar", log:"weight", detail:{setup:"Cable set high, rope or short bar in both hands, elbows pinned to your sides, slight forward lean.", execution:"Push down until your arms are straight and squeeze the backs of your arms, then let the handle rise until your forearms are just past parallel.", breathing:"Exhale pushing down, inhale on the way up.", mistake:"Letting your elbows drift forward so your shoulders and body weight do the work."}},
+  dbcurl: {name:"Dumbbell Curl", icon:"ic-curl", equip:"Dumbbells", log:"weight", detail:{setup:"Stand with a dumbbell in each hand, palms facing forward, elbows by your sides.", execution:"Curl the weights up without moving your elbows, pause at the top, then lower slowly over 2–3 seconds.", breathing:"Exhale curling up, inhale lowering.", mistake:"Swinging your back to get the weight up — pick a lighter weight."}},
+  hammercurl: {name:"Hammer Curl", icon:"ic-curl", equip:"Dumbbells", log:"weight", detail:{setup:"Stand holding dumbbells with your palms facing each other, like holding a hammer.", execution:"Curl up keeping your palms facing in and elbows by your sides, then lower slowly.", breathing:"Exhale curling up, inhale lowering.", mistake:"Letting your wrists bend — keep them straight."}},
+  overheadtri: {name:"Overhead Triceps Extension", icon:"ic-overhead", equip:"One dumbbell (or a cable rope)", log:"weight", detail:{setup:"Hold one dumbbell with both hands overhead, elbows pointing forward and close to your head.", execution:"Lower the weight behind your head by bending only at the elbows, then extend back up.", breathing:"Inhale lowering, exhale extending.", mistake:"Flaring your elbows wide and arching your back — keep your ribs down and elbows in."}},
+  calfraise: {name:"Standing Calf Raise", icon:"ic-calf", equip:"Standing calf raise machine, or the edge of a step (hold a rail)", log:"weight", detail:{setup:"Balls of your feet on the platform, heels hanging off, knees straight but not locked hard. Hold something for balance.", execution:"Lower your heels for a full stretch and pause, then rise as high as you can and pause for a second at the top.", breathing:"Steady, normal breathing.", mistake:"Bouncing through quick half-reps — go slow and use the full range."}},
+  farmercarry: {name:"Farmer's Carry", icon:"ic-carry", equip:"Heavy dumbbells", log:"weight", detail:{setup:"Pick up a heavy dumbbell in each hand, stand tall with your shoulders back.", execution:"Walk with short, steady steps for 30–40 seconds, keeping the weights still and your posture tall, then set them down.", breathing:"Breathe normally.", mistake:"Rounding your shoulders forward or leaning — stay tall."}},
+  deadhang: {name:"Dead Hang", icon:"ic-hang", equip:"Pull-up bar", log:"reps", detail:{setup:"Hang from a pull-up bar with an overhand grip, hands about shoulder-width. If a full hang is too hard, keep your feet lightly on a bench or step to take some of the weight.", execution:"Hold as long as you can, up to about 40 seconds, with your shoulders pulled gently down rather than shrugged to your ears. Stop before your grip fails completely.", breathing:"Breathe normally — don't hold your breath.", mistake:"Hanging with your shoulders shrugged up around your ears."}},
+  wristcurl: {name:"Wrist Curl", icon:"ic-wristcurl", equip:"Light dumbbell + bench", log:"weight", detail:{setup:"Sit holding a light dumbbell palm up, forearm resting on your thigh or a bench with your wrist off the edge.", execution:"Lower the weight by letting your fingers open a little, then curl your wrist up and squeeze. Slow and controlled.", breathing:"Steady, normal breathing.", mistake:"Using too much weight and bouncing through the movement."}},
+  revwristcurl: {name:"Reverse Wrist Curl", icon:"ic-wristcurl", equip:"Light dumbbell + bench", log:"weight", detail:{setup:"Sit holding a light dumbbell palm down, forearm resting on your thigh or a bench with your wrist off the edge.", execution:"Lower your wrist, then lift the back of your hand up toward the ceiling. Slow and controlled.", breathing:"Steady, normal breathing.", mistake:"Using too much weight and bouncing through the movement."}},
+};
+
+const DAYS = [
+  { label:"Full Body A", type:"strength", warmup:true, list:[
+    {k:"legpress", sets:"3 × 10–12"},{k:"chestpress", sets:"3 × 10–12"},{k:"latpulldown", sets:"3 × 10–12"},
+    {k:"lateralraise", sets:"2 × 12–15"},{k:"tricepspushdown", sets:"2 × 12–15"},{k:"calfraise", sets:"3 × 12–15"},
+    {k:"farmercarry", sets:"3 × 30–40s"},
+  ]},
+  { label:"Cardio + Core", type:"cardio", list:[
+    {k:"cardio_mod", sets:"25–35 min"},{k:"deadbug", sets:"3 × 12–15"},{k:"plank", sets:"3 × 30–45s"},
+  ]},
+  { label:"Full Body B", type:"strength", warmup:true, list:[
+    {k:"rdl", sets:"3 × 10–12"},{k:"legcurl", sets:"3 × 10–12"},{k:"inclinepress", sets:"3 × 10–12"},
+    {k:"cablerow", sets:"3 × 10–12"},{k:"lateralraise", sets:"2 × 12–15"},{k:"dbcurl", sets:"2 × 10–12"},
+    {k:"calfraise", sets:"3 × 12–15"},
+  ]},
+  { label:"Active Recovery", type:"cardio", list:[
+    {k:"walkswim", sets:"30–45 min"},{k:"stretch", sets:"10 min"},
+  ]},
+  { label:"Full Body C", type:"strength", warmup:true, list:[
+    {k:"stepup", sets:"3 × 10–12"},{k:"dbpress", sets:"3 × 10–12"},{k:"singlearmrow", sets:"3 × 10–12 /side"},
+    {k:"hammercurl", sets:"2 × 10–12"},{k:"overheadtri", sets:"2 × 10–12"},{k:"calfraise", sets:"3 × 12–15"},
+    {k:"farmercarry", sets:"3 × 30–40s"},
+  ]},
+  { label:"Longer Cardio", type:"cardio", list:[
+    {k:"cardio_long", sets:"40–50 min"},
+  ]},
+  { label:"Rest", type:"rest", list:[
+    {k:"rest", sets:"—"},
+  ]},
+];
+
+const MEALDAYS = [
+  {breakfast:"4 whole eggs, scrambled + 60g dry GF oats (cooked) + 1 medium banana", lunch:"200g grilled chicken breast + 180g cooked rice + mixed salad, 1 tbsp olive oil", snack:"250g plain Greek yogurt + 20g almonds", dinner:"200g grilled fish + 220g roasted potato + steamed vegetables"},
+  {breakfast:"3 boiled eggs + 150g cooked quinoa + a handful of berries or fruit", lunch:"200g grilled lean beef + 180g cooked rice + side salad", snack:"1 can tuna (in water) + 2-3 GF rice cakes", dinner:"200g grilled chicken + 200g sweet potato + steamed vegetables"},
+  {breakfast:"3-egg vegetable omelette (peppers, onion, spinach) + 150g cooked rice", lunch:"200g grilled fish + 150g cooked quinoa + side salad, 1 tbsp olive oil", snack:"250g plain Greek yogurt + 1 medium banana", dinner:"200g grilled beef + 220g roasted potato + steamed vegetables"},
+  {breakfast:"4 whole eggs + 60g dry GF oats (cooked) + 1 piece of fruit", lunch:"200g grilled chicken (shawarma-style, no bread) + 180g cooked rice + salad", snack:"20-25g mixed nuts + 1 apple", dinner:"200g grilled fish + 180g cooked rice + steamed vegetables"},
+  {breakfast:"3 whole eggs, scrambled + 150g cooked corn + 1 piece of fruit", lunch:"200g grilled chicken + 180g cooked lentils + side salad", snack:"1 can tuna (in water) + mixed vegetables", dinner:"200g grilled beef + 200g sweet potato + steamed vegetables"},
+  {breakfast:"3 boiled eggs + 150g cooked quinoa + 1 piece of fruit", lunch:"200g grilled fish + 180g cooked rice + side salad, 1 tbsp olive oil", snack:"250g plain Greek yogurt + 20g almonds", dinner:"200g grilled chicken + 220g roasted potato + steamed vegetables"},
+  {breakfast:"60g dry GF oats (cooked) + 3 whole eggs + 1 medium banana", lunch:"200g mixed grill (chicken/beef) + 180g cooked rice + salad", snack:"150g cooked chickpeas + 1 can tuna (in water)", dinner:"200g grilled fish + 200g sweet potato + steamed vegetables"},
+  {breakfast:"4 whole eggs + 150g cooked rice + 1 piece of fruit", lunch:"200g grilled chicken + 150g cooked quinoa + side salad, 1 tbsp olive oil", snack:"250g plain Greek yogurt + 1 piece of fruit", dinner:"200g grilled beef + 220g roasted potato + steamed vegetables"},
+];
+
+const TAPER = [
+  {week:"Weeks 1–2", detail:"Cut to 1 soda/day. Swap the second for sparkling water or a zero-sugar option."},
+  {week:"Weeks 3–4", detail:"Down to 3–4 times a week."},
+  {week:"After", detail:"Occasional treat, not a daily habit."},
+];
+
+const STEPS = [
+  {week:"Weeks 1–2", detail:"4,000–5,000 steps/day", from:1, to:2},
+  {week:"Weeks 3–4", detail:"about 6,000 steps/day", from:3, to:4},
+  {week:"Weeks 5–6", detail:"7,000–8,000 steps/day", from:5, to:6},
+  {week:"Week 7+", detail:"8,000–10,000 steps/day", from:7, to:99},
+];
+
+/* ---------- science tab content ---------- */
+const SCIENCE = [
+  {title:"How many sets", level:"Moderate",
+   take:"More sets help in some muscles, but beginners get most of the benefit from fewer than you'd think.",
+   body:"In beginners, more sets added strength and some muscle (legs and arms most), but fat-free mass and body fat changed the same on 1, 3 or 5 sets. Trained lifters grew a few muscles more on higher volumes.",
+   use:"About 6–10 hard sets per muscle a week across 3 lifting days. Legs get extra sets because they responded most to more volume.",
+   studies:[
+    {t:"Radaelli 2015, J Strength Cond Res",p:25546444,w:"48 untrained men, 6 months",r:"5 sets beat 3, which beat 1, for strength, endurance and upper-arm size; fat-free mass and body fat changed the same in every group."},
+    {t:"Rønnestad 2007, J Strength Cond Res",p:17313291,w:"21 untrained men, 11 weeks",r:"3 sets beat 1 for leg strength and thigh size; no difference in the upper body."},
+    {t:"Schoenfeld 2019, Med Sci Sports Exerc",p:30153194,w:"34 trained men, 8 weeks",r:"Strength was similar on 1, 3 or 5 sets; a few muscles grew more with higher volume."},
+    {t:"Cunha 2020, J Strength Cond Res",p:30272625,w:"62 older untrained women, 12 weeks",r:"Single and multiple sets gave similar improvements."}],
+   refs:[{t:"Rhea 2003 meta-analysis of 140 studies: 4 sets per muscle group a week gave maximal strength gains",u:"https://pubmed.ncbi.nlm.nih.gov/12618576/"}]},
+  {title:"How many days a week", level:"Moderate",
+   take:"With the same weekly volume, training more often made little difference.",
+   body:"Most trials found no meaningful difference between training a muscle once, twice, three or five times a week when total volume matched. One found a small size edge for very frequent training.",
+   use:"Three full-body days is plenty. Splitting into body-part days isn't needed.",
+   studies:[
+    {t:"Franco 2021, J Strength Cond Res",p:31009427,w:"18 untrained men, 8 weeks",r:"1 vs 5 sessions a week with equal volume: similar lean-mass and strength gains."},
+    {t:"Evangelista 2021, Einstein (São Paulo)",p:34468591,w:"67 untrained people, 8 weeks",r:"Each muscle trained twice vs four times a week: no significant differences."},
+    {t:"Saric 2019, J Strength Cond Res",p:30363041,w:"27 trained men, 6 weeks",r:"3 vs 6 sessions a week, volume matched: similar results."},
+    {t:"Colquhoun 2018, J Strength Cond Res",p:29324578,w:"28 trained men, 6 weeks",r:"3 vs 6 sessions a week: volume, not frequency, tracked strength gains."},
+    {t:"Zaroni 2019, J Strength Cond Res",p:31260419,w:"18 well-trained men, 8 weeks",r:"Same strength; training each muscle 5 days a week gave slightly more size at two sites."}],
+   refs:[]},
+  {title:"Effort and heavy vs light", level:"Moderate",
+   take:"Hard sets matter; going all the way to failure isn't essential.",
+   body:"When sets went to failure, light and heavy loads grew muscle about equally. Whether to push to failure is less clear: one trial found a modest edge for some size measures, another in older adults found stopping short worked about as well.",
+   use:"Finish sets hard, with the last couple of reps a struggle, but you don't need to hit failure. Weeks 1–2: stay a few reps short while you learn the movements.",
+   studies:[
+    {t:"Mitchell 2012, J Appl Physiol",p:22518835,w:"18 men",r:"Light load lifted to failure grew muscle about the same as heavy load to failure."},
+    {t:"Morton 2016, J Appl Physiol",p:27174923,w:"Resistance-trained young men",r:"With sets taken to failure, load didn't dictate growth or, mostly, strength."},
+    {t:"Hermann 2025, Med Sci Sports Exerc",p:40249908,w:"42 trained men and women, single sets",r:"Going to failure gave modestly more size and power in some measures, not strength or endurance."},
+    {t:"Bergamasco 2022, J Strength Cond Res",p:33443368,w:"Older adults, low loads",r:"Stopping short of failure improved strength about as much as going to failure."}],
+   refs:[{t:"Robinson 2024 meta-regression on proximity to failure",u:"https://doi.org/10.1007/s40279-024-02069-2"}]},
+  {title:"Rest between sets", level:"Limited",
+   take:"Trials disagree, depending on who was studied.",
+   body:"One trial in young trained men found 3-minute rests beat 1-minute. Another in older men found 60-second rests beat 4-minute for body composition and performance.",
+   use:"Rest long enough to repeat your reps, roughly 1–3 minutes. No fixed number is proven for beginners.",
+   studies:[
+    {t:"Schoenfeld 2016, J Strength Cond Res",p:26605807,w:"21 trained young men, 8 weeks",r:"3-minute rests beat 1-minute for strength and muscle size."},
+    {t:"Villanueva 2015, Eur J Appl Physiol",p:25294666,w:"22 older men (65–70), 8 weeks",r:"60-second rests beat 4-minute rests for body composition and performance."}],
+   refs:[]},
+  {title:"Arm exercises", level:"Limited",
+   take:"For beginners, compound lifts already train the arms.",
+   body:"Adding direct arm exercises gave no extra size or strength in two trials of untrained men; arm circumference grew slightly more in one.",
+   use:"Curls and triceps work are in because you want arm shape and they're short, not because the plan fails without them.",
+   studies:[
+    {t:"Gentil 2013, Appl Physiol Nutr Metab",p:23537028,w:"29 untrained men, 10 weeks",r:"Adding single-joint arm exercises gave no extra size or strength."},
+    {t:"Barbalho 2018, Eur J Transl Myol",p:30662699,w:"20 untrained men",r:"No extra strength or skinfold change; arm circumference grew slightly more (+5.2% vs +4.0%)."}],
+   refs:[]},
+  {title:"Calves", level:"Limited",
+   take:"Calves respond to higher volume, standing raises and a deep stretch.",
+   body:"All three trials were in healthy young adults, mostly women, so treat the numbers as a guide.",
+   use:"Standing raises, 3 sets on each lifting day (9 a week), lowering into a full stretch each rep.",
+   studies:[
+    {t:"Kassiano 2024, Int J Sports Med",p:38684187,w:"61 untrained young women, 6 weeks",r:"12 weekly sets beat 6 for calf growth; 9 sets wasn't clearly different from either."},
+    {t:"Kinoshita 2023, Front Physiol",p:38156065,w:"Healthy adults",r:"Standing calf raises grew the gastrocnemius far more than seated ones; the soleus grew similarly."},
+    {t:"Kassiano 2023, J Strength Cond Res",p:37015016,w:"Young women",r:"Calf raises through the stretched part of the range grew the lateral gastrocnemius most (+14.9% vs +6.2% for the end range)."}],
+   refs:[]},
+  {title:"Soreness gets better", level:"Strong",
+   take:"The second time you do an exercise, you get less sore.",
+   body:"A meta-analysis of 20 studies found soreness and muscle-damage markers were lower 24–48 hours after a repeat bout of the same exercise.",
+   use:"Expect soreness to ease over the first 2–3 weeks. Joint pain is different. Stop the set.",
+   studies:[],refs:[{t:"Doma et al. 2023, repeated bout effect meta-analysis",u:"https://researchonline.jcu.edu.au/81416"}]},
+  {title:"Warm-ups", level:"Limited",
+   take:"Structured warm-ups cut injuries in team sports. I found no trials in gym lifters.",
+   body:"Both trials were cluster-randomized in young team-sport athletes. A structured neuromuscular warm-up (strength, balance and landing work) reduced injuries.",
+   use:"Your warm-up includes squats, lunges and band work, not just arm circles. Add 1–2 lighter sets of your first lift.",
+   studies:[
+    {t:"Soligard 2008, BMJ",p:19066253,w:"125 youth football clubs (cluster trial)",r:"Fewer injuries overall, overuse and severe injuries; the main lower-limb outcome wasn't significant."},
+    {t:"LaBella 2011, Arch Pediatr Adolesc Med",p:22065184,w:"High-school female soccer and basketball (cluster trial)",r:"Coach-led neuromuscular warm-up: about two-thirds fewer noncontact lower-limb injuries."}],
+   refs:[{t:"Fradkin 2006 systematic review: insufficient evidence either way",u:"https://search.pedro.org.au/search-results/record-detail/15504"}]},
+  {title:"Deload weeks", level:"Expert opinion",
+   take:"Widely used, but under-researched.",
+   body:"Researchers describe deloading as common in strength training but under-researched. Guidance comes from expert consensus, not trials.",
+   use:"No fixed schedule. Take a lighter week if your lifts stall or you feel run down for about two weeks.",
+   studies:[],refs:[{t:"Bell et al. 2023, Sports Med Open",u:"https://shura.shu.ac.uk/32417/"}]},
+  {title:"Lifting while dieting", level:"Moderate",
+   take:"Lifting protects muscle during weight loss.",
+   body:"Four trials found lifting preserved or added lean mass during weight loss. Only one was in young men; the rest were in women or older adults.",
+   use:"Judge progress by waist and strength, not just the scale.",
+   studies:[
+    {t:"Hunter 2008, Obesity",p:18356845,w:"Premenopausal women losing about 12 kg",r:"Lifting kept fat-free mass, resting energy use and strength; aerobic-only or no exercise lost fat-free mass."},
+    {t:"Campbell 2009, Obesity",p:19247271,w:"16 overweight older women",r:"Lifting helped preserve fat-free mass during weight loss."},
+    {t:"Verreijen 2017, Nutr J",p:28166780,w:"100 older adults",r:"Lifting plus high protein increased fat-free mass; high protein alone wasn't significant."},
+    {t:"Demling 2000, Ann Nutr Metab",p:10838463,w:"Overweight police officers, 12 weeks",r:"Diet plus protein plus lifting gained lean mass; diet alone did not."}],
+   refs:[{t:"2025 meta-analysis of trials in adults with overweight or obesity",u:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12406911/"}]},
+  {title:"How much protein", level:"Moderate",
+   take:"In a calorie deficit with hard training, higher protein did better.",
+   body:"A meta-analysis of healthy adults found muscle gain levelled off around 1.6 g/kg. But in a trial with a big calorie deficit and intense training, 2.4 g/kg beat 1.2 g/kg for lean mass and fat loss. That trial was short and extreme, so I wouldn't copy it.",
+   use:"Aim for 170–190 g a day (about 1.8–2.0 g/kg). 150 g is the floor.",
+   studies:[
+    {t:"Longland 2016, Am J Clin Nutr",p:26817506,w:"40 young men, 4 weeks, ~40% calorie deficit",r:"2.4 g/kg beat 1.2 g/kg for lean-mass gain and fat loss alongside intense training."}],
+   refs:[{t:"Morton 2018 meta-analysis (49 trials): gains level off around 1.6 g/kg",u:"https://openrepository.aut.ac.nz/items/8dea98a4-4e37-4c60-be43-4b6ece0bd9a5/full"}]},
+  {title:"Protein timing", level:"Mixed",
+   take:"Total daily protein matters most.",
+   body:"Both trials found protein before vs after training gave similar results.",
+   use:"Eat when it suits you. If your next meal is far off, a protein snack helps you reach your total.",
+   studies:[
+    {t:"Schoenfeld 2017, PeerJ",p:28070459,w:"21 trained men, 10 weeks",r:"25 g of protein right before vs right after training: similar results."},
+    {t:"Nabuco 2018, Nutrients",p:29751507,w:"Older women",r:"Whey before or after training: similar gains."}],
+   refs:[]},
+  {title:"How fast to lose weight", level:"Limited",
+   take:"The evidence is thin and conflicting.",
+   body:"One trial in athletes favoured the slower rate; another found no body-composition difference once energy balance was restored.",
+   use:"About 0.5–0.8 kg a week is reasonable, but it isn't proven better than faster. Adherence matters more.",
+   studies:[
+    {t:"Garthe 2011, Int J Sport Nutr Exerc Metab",p:21558571,w:"24 athletes lifting 4×/week",r:"Planned 0.7% vs 1.4% of bodyweight a week (achieved about 0.7% vs 1.0%): the slower group gained lean mass, the faster didn't."},
+    {t:"Coutinho 2018, Clin Nutr",p:28479016,w:"Rapid vs slow weight loss trial",r:"No body-composition difference once energy balance was restored."}],
+   refs:[]},
+  {title:"You can't spot-reduce belly fat", level:"Moderate",
+   take:"Ab exercises build abs; broader exercise lowers belly fat.",
+   body:"Two trials found ab training didn't reduce abdominal fat. One small trial found some local fat loss. A 12-month trial found general exercise reduced abdominal fat.",
+   use:"Core work is for strength and shape underneath. Waist size comes down through the overall deficit and general activity, so we track it.",
+   studies:[
+    {t:"Vispute 2011, J Strength Cond Res",p:21804427,w:"24 sedentary adults, 6 weeks",r:"Ab training alone didn't reduce abdominal fat."},
+    {t:"Kordi 2015, J Manipulative Physiol Ther",p:25766455,w:"40 overweight and obese women",r:"Diet plus ab training was no better than diet alone for abdominal fat."},
+    {t:"Brobakken 2023, Physiol Rep",p:38010201,w:"16 overweight men",r:"Energy-matched ab endurance vs treadmill: same total fat loss, but more local fat loss with abs (small trial)."},
+    {t:"Irwin 2003, JAMA",p:12525233,w:"12 months, postmenopausal women",r:"Regular exercise cut subcutaneous abdominal fat, more with more exercise (the intra-abdominal result wasn't significant)."}],
+   refs:[]},
+  {title:"Daily steps", level:"Moderate",
+   take:"Pedometer programs raised steps and helped weight, but gains faded without support.",
+   body:"Observational studies link more steps to better health, levelling off around 8,000–10,000 for adults under 60 in the main meta-analysis. The two trials here tested walking programs directly.",
+   use:"The ramp is 5,000 now, then about 6,000, 7,500, and 8,000+. It's my design, built on that range.",
+   studies:[
+    {t:"Cayir 2015, Eur J Sport Sci",p:25068676,w:"Obese patients, 3 months, pedometer vs control",r:"The pedometer group raised steps and lost more weight, BMI, body fat and waist."},
+    {t:"Tudor-Locke 2004, Int J Obes",p:14569279,w:"47 sedentary overweight adults with type 2 diabetes",r:"Walking jumped quickly but had relapsed by 24 weeks."}],
+   refs:[{t:"Paluch 2022 meta-analysis of 15 cohorts, Lancet Public Health",u:"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9289978"}]},
+  {title:"Activity guidelines", level:"Strong",
+   take:"Cardio plus strength work is the baseline for health.",
+   body:"The WHO recommends 150–300 minutes of moderate aerobic activity a week, plus muscle-strengthening on at least two days.",
+   use:"Your cardio days and steps cover the aerobic part; your lifting days cover the strength part.",
+   studies:[],refs:[{t:"Bull et al. 2020, WHO guidelines, Br J Sports Med",u:"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7719906/"}]},
+  {title:"Sleep while dieting", level:"Moderate",
+   take:"Three trials agree: short sleep hurts fat loss.",
+   body:"Less sleep shifted weight loss away from fat, and extending sleep cut calorie intake.",
+   use:"Your 8+ hours is a real advantage. Keep it.",
+   studies:[
+    {t:"Nedeltcheva 2010, Ann Intern Med",p:20921542,w:"10 overweight adults, crossover, 14 days",r:"Less sleep: less of the weight lost was fat, more was lean mass."},
+    {t:"Wang 2018, Sleep",p:29438540,w:"Overweight and obese adults, 8-week diet",r:"About 1 hour less sleep on 5 nights a week gave a smaller share of fat lost, with the same weight lost."},
+    {t:"Tasali 2022, JAMA Intern Med",p:35129580,w:"Overweight adults who slept short",r:"Sleep extension cut energy intake and led to weight reduction."}],
+   refs:[]},
+  {title:"How much water", level:"Moderate",
+   take:"The reference intake is for total water, including food.",
+   body:"The US reference for men is 3.7 L of total water a day, of which about 3.0 L typically comes from drinks. It covers sedentary people in temperate climates; heat and heavy activity raise the need.",
+   use:"Aim for about 3 L from drinks, more on training days and hot days.",
+   studies:[],refs:[{t:"NASEM 2005, Dietary Reference Intakes for water",u:"https://www.nationalacademies.org/read/10925/chapter/6"}]},
+  {title:"Grip and straps", level:"Limited",
+   take:"Grip can limit deadlifts; straps help there but not on pulldowns.",
+   body:"No trial I found tested hand-specific training in young adults. Regular lifting also improves grip.",
+   use:"Farmer's carries on Days 1 and 5 train grip. Use straps only on heavy Romanian deadlift sets when your grip fails before your hamstrings do.",
+   studies:[
+    {t:"Jukic 2021, Physiol Behav",p:33306977,w:"16 men, deadlifts",r:"Straps reduced grip fatigue and improved performance."},
+    {t:"Trahey 2023, J Strength Cond Res",p:37729509,w:"10 women, deadlifts",r:"Straps allowed more reps with less grip loss."},
+    {t:"Valério 2021, Sports Biomech",p:31198105,w:"12 trained men, lat pulldown",r:"Straps gave no benefit for 1RM, reps or lat activation."},
+    {t:"Gerodimos 2021, Hand Surg Rehabil",p:33340721,w:"Older adults, 8 weeks",r:"A specific hand-grip program improved grip strength and endurance. I found none in young adults."}],
+   refs:[]},
+];
+
+/* ---------- tips / units ---------- */
+const TIPS = {
+  rdl:"Straps (optional): use them only if your grip gives out before your hamstrings and back do.",
+  chestpress:"Keep your wrists straight and stacked over your forearms.",
+  pushup:"Keep your wrists straight and stacked under your shoulders.",
+  dbpress:"Keep your wrists straight and stacked over your forearms.",
+  inclinepress:"Keep your wrists straight and stacked over your forearms.",
+  shoulderpress:"Keep your wrists straight and stacked over your forearms.",
+  latpulldown:"If your hands let go before your back is tired, note it in your log — that's grip being the limiter.",
+  cablerow:"If your hands let go before your back is tired, note it in your log — that's grip being the limiter.",
+  singlearmrow:"If your hand lets go first, that's grip being the limiter. The grip block at the end of the session is for that.",
+  tricepspushdown:"Elbows stay at your sides; only your forearms move.",
+  calfraise:"Standing (knees straight) raises grew more calf than seated ones in a small study — see the Science tab.",
+  farmercarry:"Pick a weight that makes your grip burn near the end but that you can hold for the full time.",
+  hammercurl:"Also works the thick forearm muscle on the thumb side and helps your grip."
+};
+const UNITS = {plank:'s', sideplank:'s', farmercarry:'s', deadhang:'s'};
+
+/* ---------- saved state ---------- */
+const KEY = 'plan.v3';
+function blank(){ return {week:2, checked:{}, logs:{}, water:{}, steps:{}, checkins:[]}; }
+let S = blank();
+let storageOK = true;
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){ S = Object.assign(blank(), JSON.parse(raw)); }
+    localStorage.setItem('__probe','1'); localStorage.removeItem('__probe');
+  }catch(e){ storageOK = false; }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch(e){ storageOK = false; updateSaveBanner(); }
+}
+function updateSaveBanner(){
+  const el = document.getElementById('saveWarn');
+  if(!el) return;
+  if(storageOK){ el.hidden = true; return; }
+  el.hidden = false;
+  el.textContent = "This browser isn't saving between visits (private mode or a preview). Open the app from your Home Screen icon for saving to work.";
+}
+function today(){
+  if(window.__today) return window.__today;
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function shortDate(d){
+  const p = d.split('-').map(Number);
+  return new Date(p[0],p[1]-1,p[2]).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+}
+function fmtSet(s, key){
+  const sec = UNITS[key]==='s';
+  if(s.weight!=null) return `${s.weight}kg × ${s.reps}${sec?'s':''}`;
+  return sec ? `${s.reps}s` : `${s.reps} reps`;
+}
+function exKey(id){
+  const m = /^d(\d+)-e(\d+)$/.exec(id);
+  return DAYS[+m[1]].list[+m[2]].k;
+}
+function getLogs(key){ return ((S.logs[today()]||{})[key]) || []; }
+function lastTime(key){
+  const t = today();
+  const dates = Object.keys(S.logs).filter(d=>d<t && (S.logs[d][key]||[]).length).sort();
+  if(!dates.length) return null;
+  const d = dates[dates.length-1];
+  return {date:d, sets:S.logs[d][key]};
+}
+function isChecked(id){ return !!((S.checked[today()]||{})[id]); }
+
+/* ---------- UI state (not saved) ---------- */
+let openCards = new Set();
+let currentDay = 0;
+
+function illustrationSVG(icon){
+  return `<svg viewBox="0 0 100 100"><use href="#${icon}"/></svg>`;
+}
+
+/* ---------- steps card ---------- */
+function stepTarget(w){
+  if(w<=2) return {goal:5000, label:'4,000–5,000'};
+  if(w<=4) return {goal:6000, label:'about 6,000'};
+  if(w<=6) return {goal:7500, label:'7,000–8,000'};
+  return {goal:8000, label:'8,000–10,000'};
+}
+function renderStepsCard(){
+  const t = stepTarget(S.week);
+  const n = S.steps[today()] || 0;
+  const pct = Math.min(100, Math.round(n / t.goal * 100));
+  document.getElementById('stepsCard').innerHTML = `
+    <div class="steps-card">
+      <div class="steps-top">
+        <div>
+          <div class="steps-title">Daily steps <small>All-day total, on top of your training</small></div>
+          <div class="steps-target">Week ${S.week} target: ${t.label}</div>
+        </div>
+        <div class="week-ctl">
+          <button type="button" aria-label="Previous week" onclick="setWeek(-1)">−</button>
+          <span>Wk ${S.week}</span>
+          <button type="button" aria-label="Next week" onclick="setWeek(1)">+</button>
+        </div>
+      </div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="steps-row">
+        <input id="stepsInput" type="number" inputmode="numeric" placeholder="Today's steps (see Health app)" aria-label="Steps today" value="${n||''}">
+        <button type="button" onclick="saveSteps()">Save</button>
+      </div>
+      <div class="steps-now">Today: ${n.toLocaleString()} / ${t.goal.toLocaleString()}</div>
+    </div>`;
+}
+function saveSteps(){
+  const v = parseInt(document.getElementById('stepsInput').value, 10);
+  if(isNaN(v) || v < 0) return;
+  S.steps[today()] = v; save(); renderStepsCard();
+}
+function setWeek(d){
+  S.week = Math.max(1, Math.min(52, S.week + d)); save();
+  renderStepsCard(); renderSteps(); renderExerciseList();
+}
+
+/* ---------- workouts ---------- */
+function renderDayStrip(activeIdx){
+  const strip = document.getElementById('dayStrip');
+  strip.innerHTML = DAYS.map((d,i)=>`
+    <button type="button" class="day-chip ${i===activeIdx?'active':''}" data-day="${i}" aria-pressed="${i===activeIdx}">
+      Day ${i+1}<small>${d.type==='strength'?'Lift':d.type==='cardio'?'Cardio':'Rest'}</small>
+    </button>`).join('');
+  strip.querySelectorAll('.day-chip').forEach(el=>{
+    el.addEventListener('click',()=>showDay(parseInt(el.dataset.day)));
+  });
+}
+
+function showDay(idx){
+  currentDay = idx;
+  const d = DAYS[idx];
+  document.getElementById('dayTitle').textContent = `Day ${idx+1} — ${d.label}`;
+  document.getElementById('daySub').textContent =
+    d.type==='strength' ? 'Full gym. Write your numbers down — they\'re how you progress.' :
+    d.type==='cardio' ? 'Keep it steady — this should feel sustainable.' :
+    'Recovery day.';
+  renderExerciseList();
+  renderDayStrip(idx);
+}
+
+function effortCard(d){
+  if(d.type !== 'strength') return '';
+  const early = S.week <= 2;
+  const head = early ? 'Weeks 1–2: learn the movements' : 'Make the last reps count';
+  const body = early
+    ? 'Stop each set about 3–4 reps before you couldn\'t do another, and focus on form.'
+    : 'Finish each working set with about 1–3 reps left — the last two reps should feel hard, but you don\'t need to hit failure.';
+  return `<div class="note-card effort-card"><b>${head}</b> — ${body} Rest long enough to repeat your reps, roughly 1–3 minutes.</div>`;
+}
+
+function renderExerciseList(){
+  const d = DAYS[currentDay];
+  let html = effortCard(d);
+  if(d.warmup){
+    html += `<div class="warmup-card"><b>Warm-up — 5-8 min</b><ul>
+      <li>Arm circles, 20s each direction</li>
+      <li>Leg swings, 10 each leg, each direction</li>
+      <li>Bodyweight squats × 15</li>
+      <li>Reverse lunges × 6 each leg</li>
+      <li>Band pull-aparts × 15 (if available)</li>
+    </ul></div>`;
+  }
+  d.list.forEach((item,i)=>{
+    const ex = EX[item.k];
+    const id = `d${currentDay}-e${i}`;
+    const isDone = isChecked(id);
+    const isOpen = openCards.has(id);
+    const logs = getLogs(item.k);
+    const tip = TIPS[item.k];
+    html += `
+    <div class="ex-card ${isOpen?'open':''}" id="card-${id}">
+      <div class="ex-head" onclick="toggleExpand('${id}')">
+        <button type="button" class="ex-check ${isDone?'done':''}" aria-label="Mark ${ex.name} done" onclick="event.stopPropagation();toggleCheck('${id}')">${isDone?'✓':''}</button>
+        <div class="ex-icon">${figThumb(item.k, ex)}</div>
+        <div class="ex-body">
+          <p class="ex-name ${isDone?'done-text':''}">${ex.name}</p>
+          <p class="ex-meta">${item.sets} · ${ex.equip}${logs.length?' · '+logs.length+' logged':''}</p>
+        </div>
+        <div class="ex-chevron">›</div>
+      </div>
+      <div class="ex-detail">
+        <div class="ex-detail-inner">
+          ${figBig(item.k, ex)}
+          <p class="ex-step"><b>EQUIPMENT</b>${ex.equip}</p>
+          <p class="ex-step"><b>SETUP</b>${ex.detail.setup}</p>
+          <p class="ex-step"><b>EXECUTION</b>${ex.detail.execution}</p>
+          <p class="ex-step"><b>BREATHING</b>${ex.detail.breathing}</p>
+          <div class="ex-mistake"><b>Common mistake:</b> ${ex.detail.mistake}</div>
+          ${tip ? `<div class="ex-tip"><b>Tip:</b> ${tip}</div>` : ''}
+          ${renderLogBox(id, ex, item.k)}
+          ${ex.equip!=="—" ? `<a class="demo-link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name+' proper form gym')}" target="_blank" rel="noopener">▶ Watch a real demo</a>` : ''}
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('exerciseList').innerHTML = html;
+  hydrateFigs(document.getElementById('exerciseList'));
+  updateProgress();
+}
+
+function renderLogBox(id, ex, key){
+  if(ex.log === 'none') return '';
+  const sec = UNITS[key]==='s';
+  const logs = getLogs(key);
+  const weightInput = ex.log === 'weight' ? `<input type="number" inputmode="decimal" placeholder="kg" class="log-input" id="w-${id}" aria-label="Weight used, kg">` : '';
+  const repsPh = sec ? 'seconds' : 'reps';
+  const lt = lastTime(key);
+  const last = lt
+    ? `<div class="log-last">Last time (${shortDate(lt.date)}): ${lt.sets.map(s=>fmtSet(s,key)).join(' · ')}. Beat it by a rep or two, or add a little weight once you hit the top of the range on every set.</div>`
+    : `<div class="log-last">First time logging this one — note what felt right so you can beat it next time.</div>`;
+  const entries = logs.map((s,idx)=>`
+    <div class="log-entry"><span>Set ${idx+1}: ${fmtSet(s,key)}</span><span class="log-remove" role="button" tabindex="0" aria-label="Delete set ${idx+1}" onclick="removeSet('${id}',${idx})">✕</span></div>`).join('');
+  return `
+    <div class="log-box">
+      <div class="log-title">Log your sets</div>
+      ${last}
+      <div class="log-inputs">
+        ${weightInput}
+        <input type="number" inputmode="numeric" placeholder="${repsPh}" class="log-input" id="r-${id}" aria-label="${sec?'Seconds held':'Reps completed'}">
+        <button type="button" onclick="addSet('${id}')">+ Add</button>
+      </div>
+      ${entries ? `<div class="log-entries">${entries}</div>` : ''}
+    </div>`;
+}
+
+function addSet(id){
+  const key = exKey(id);
+  const wInput = document.getElementById('w-'+id);
+  const rInput = document.getElementById('r-'+id);
+  const weight = wInput ? parseFloat(wInput.value) : null;
+  const reps = rInput ? parseFloat(rInput.value) : null;
+  if(reps === null || isNaN(reps) || reps <= 0) return;
+  const t = today();
+  S.logs[t] = S.logs[t] || {};
+  (S.logs[t][key] = S.logs[t][key] || []).push({weight: (weight!=null && !isNaN(weight)) ? weight : null, reps});
+  save();
+  renderExerciseList();
+}
+function removeSet(id, idx){
+  const key = exKey(id);
+  const arr = getLogs(key);
+  const s = arr[idx];
+  if(!s) return;
+  if(!confirm(`Delete this set (${fmtSet(s,key)})?`)) return;
+  arr.splice(idx,1);
+  save();
+  renderExerciseList();
+}
+
+function toggleExpand(id){
+  const card = document.getElementById('card-'+id);
+  card.classList.toggle('open');
+  if(card.classList.contains('open')) openCards.add(id); else openCards.delete(id);
+}
+function toggleCheck(id){
+  const t = today();
+  S.checked[t] = S.checked[t] || {};
+  S.checked[t][id] = !S.checked[t][id];
+  save();
+  renderExerciseList();
+}
+function updateProgress(){
+  const d = DAYS[currentDay];
+  let done = 0;
+  d.list.forEach((item,i)=>{ if(isChecked(`d${currentDay}-e${i}`)) done++; });
+  document.getElementById('dayProgress').textContent = `${done}/${d.list.length} complete`;
+}
+
+/* ---------- diet ---------- */
+function renderMealStrip(activeIdx){
+  const strip = document.getElementById('mealStrip');
+  strip.innerHTML = MEALDAYS.map((m,i)=>`
+    <button type="button" class="day-chip diet-chip ${i===activeIdx?'active':''}" data-meal="${i}" aria-pressed="${i===activeIdx}">Day ${i+1}</button>`).join('');
+  strip.querySelectorAll('.diet-chip').forEach(el=>{
+    el.addEventListener('click',()=>showMealDay(parseInt(el.dataset.meal)));
+  });
+}
+function showMealDay(idx){
+  const m = MEALDAYS[idx];
+  document.getElementById('mealList').innerHTML = `
+    <div class="meal"><div class="meal-row"><span class="meal-name">Breakfast</span><span class="meal-desc">${m.breakfast}</span></div></div>
+    <div class="meal"><div class="meal-row"><span class="meal-name">Lunch</span><span class="meal-desc">${m.lunch}</span></div></div>
+    <div class="meal"><div class="meal-row"><span class="meal-name">Snack</span><span class="meal-desc">${m.snack}</span></div></div>
+    <div class="meal"><div class="meal-row"><span class="meal-name">Dinner</span><span class="meal-desc">${m.dinner}</span></div></div>`;
+  renderMealStrip(idx);
+}
+function renderTaper(){
+  document.getElementById('taperList').innerHTML = TAPER.map(t=>`
+    <div class="taper-row"><span class="taper-week">${t.week}</span><span>${t.detail}</span></div>`).join('');
+}
+
+/* ---------- habits ---------- */
+function renderSteps(){
+  document.getElementById('stepList').innerHTML = STEPS.map(s=>{
+    const now = S.week >= s.from && S.week <= s.to;
+    return `<div class="taper-row ${now?'now':''}"><span class="taper-week">${s.week}</span><span>${s.detail}${now?' · you are here':''}</span></div>`;
+  }).join('');
+}
+function renderWater(){ document.getElementById('waterVal').textContent = (S.water[today()]||0); }
+function addWater(n){
+  const t = today();
+  S.water[t] = (S.water[t]||0) + n; save(); renderWater();
+}
+function resetWater(){
+  if(!confirm("Reset today's water to 0?")) return;
+  S.water[today()] = 0; save(); renderWater();
+}
+
+function logWeight(){
+  const wInput = document.getElementById('weightInput');
+  const waistInput = document.getElementById('waistInput');
+  const w = parseFloat(wInput.value);
+  const waist = parseFloat(waistInput.value);
+  if(isNaN(w) && isNaN(waist)) return;
+  S.checkins.push({date: today(), weight: isNaN(w)?null:w, waist: isNaN(waist)?null:waist});
+  save();
+  wInput.value = ''; waistInput.value = '';
+  renderWeightLog();
+}
+function removeCheckin(i){
+  if(!confirm('Delete this check-in?')) return;
+  S.checkins.splice(i,1); save(); renderWeightLog();
+}
+function renderWeightLog(){
+  const box = document.getElementById('weightLog');
+  const list = S.checkins;
+  if(list.length === 0){ box.innerHTML = ''; return; }
+  let html = '';
+  for(let i = list.length - 1; i >= 0; i--){
+    const e = list[i];
+    const parts = [];
+    if(e.weight!=null) parts.push(e.weight+'kg');
+    if(e.waist!=null) parts.push(e.waist+'cm waist');
+    let trend = '';
+    if(i > 0){
+      const prev = list[i-1];
+      if(e.weight!=null && prev.weight!=null){
+        const d = e.weight - prev.weight;
+        if(d < 0) trend += `<span class="trend down">↓ ${Math.abs(d).toFixed(1)}kg</span>`;
+        else if(d > 0) trend += `<span class="trend up">↑ ${d.toFixed(1)}kg</span>`;
+      }
+      if(e.waist!=null && prev.waist!=null){
+        const dw = e.waist - prev.waist;
+        if(dw < 0) trend += `<span class="trend down">↓ ${Math.abs(dw).toFixed(1)}cm</span>`;
+        else if(dw > 0) trend += `<span class="trend up">↑ ${dw.toFixed(1)}cm</span>`;
+      }
+    }
+    html += `<div class="weight-entry"><span>${shortDate(e.date)} — ${parts.join(' · ')}</span><span>${trend}<span class="log-remove" role="button" tabindex="0" aria-label="Delete check-in" onclick="removeCheckin(${i})">✕</span></span></div>`;
+  }
+  box.innerHTML = html;
+}
+
+/* ---------- backup ---------- */
+function exportData(){
+  const txt = JSON.stringify(S);
+  const box = document.getElementById('backupBox');
+  box.value = txt;
+  box.select();
+  try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).catch(()=>{}); } }catch(e){}
+  document.getElementById('backupMsg').textContent = 'Backup is in the box above. Copy it and paste it somewhere safe, like Notes.';
+}
+function importData(){
+  const msg = document.getElementById('backupMsg');
+  let d;
+  try{ d = JSON.parse(document.getElementById('backupBox').value); }catch(e){ msg.textContent = "That text isn't a valid backup."; return; }
+  if(!d || typeof d !== 'object' || Array.isArray(d) || !Array.isArray(d.checkins || []) || typeof (d.logs||{}) !== 'object'){
+    msg.textContent = "That text isn't a valid backup."; return;
+  }
+  if(!confirm('Replace the data on this device with this backup?')) return;
+  S = Object.assign(blank(), d);
+  save(); refreshAll();
+  msg.textContent = 'Restored.';
+}
+
+/* ---------- science ---------- */
+function renderScience(){
+  document.getElementById('scienceList').innerHTML = SCIENCE.map((s,i)=>{
+    const cls = s.level==='Strong'?'strong':s.level==='Moderate'?'moderate':s.level==='Limited'?'limited':'';
+    const studies = (s.studies||[]).map(x=>`<div class="sci-study"><a href="https://pubmed.ncbi.nlm.nih.gov/${x.p}/" target="_blank" rel="noopener">${x.t}</a><span> — ${x.w}. ${x.r}</span></div>`).join('');
+    const refs = (s.refs||[]).map(r=> r.u ? `<a href="${r.u}" target="_blank" rel="noopener">${r.t}</a>` : `<span>${r.t}</span>`).join('');
+    return `
+    <div class="sci" id="sci-${i}">
+      <button type="button" class="sci-head" aria-expanded="false" onclick="toggleSci(${i})">
+        <span class="sci-main"><span class="sci-title">${s.title}</span><span class="sci-take">${s.take}</span></span>
+        <span class="chip ${cls}">${s.level}</span>
+        <span class="sci-chev">›</span>
+      </button>
+      <div class="sci-body"><div class="sci-inner">
+        <p>${s.body}</p>
+        <p class="sci-use"><b>In your plan:</b> ${s.use}</p>
+        ${studies?`<div class="sci-sub">Trials (tap a name to open it on PubMed)</div>${studies}`:''}
+        ${refs?`<div class="sci-sub">${studies?'Also':'Source'}</div><div class="sci-refs">${refs}</div>`:''}
+      </div></div>
+    </div>`;
+  }).join('');
+}
+function toggleSci(i){
+  const el = document.getElementById('sci-'+i);
+  el.classList.toggle('open');
+  el.querySelector('.sci-head').setAttribute('aria-expanded', el.classList.contains('open'));
+}
+
+/* ---------- anatomical figure glue ---------- */
+const FIGMAP = {legpress:'legpress',chestpress:'chestpress',inclinepress:'inclinepress',dbpress:'dbpress',latpulldown:'latpulldown',cablerow:'cablerow',
+  tricepspushdown:'tricepspushdown',dbcurl:'dbcurl',hammercurl:'hammercurl',overheadtri:'overheadtri',calfraise:'calfraise',farmercarry:'farmercarry',
+  rdl:'rdl',singlearmrow:'singlearmrow',stepup:'stepup',deadbug:'deadbug',plank:'plank',cardio_mod:'cardio',cardio_long:'cardio',walkswim:'walk',
+  stretch:'stretch',hipflexor:'stretch',rest:'rest',lateralraise:'lateralraise',legcurl:'legcurl'};
+document.getElementById('figDefsHost').innerHTML = '<svg width="0" height="0">'+FIG.defs+'</svg>';
+const REDUCE = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function figThumb(k, ex){
+  const fk = FIGMAP[k]; if(!fk) return illustrationSVG(ex.icon);
+  return `<svg class="fig fig-thumb" data-fig="${fk}" role="img" aria-label="${ex.name}"></svg>`;
+}
+function figBig(k, ex){
+  const fk = FIGMAP[k]; if(!fk) return `<div class="ex-illustration">${illustrationSVG(ex.icon)}</div>`;
+  const d = FIG.EX[fk];
+  const legend = fk==='rest'
+    ? `<div class="mus-legend"><div class="mus-title">Nothing to work today</div><div class="mus-note">Let your muscles recover.</div></div>`
+    : `<div class="mus-legend"><div class="mus-title">Muscles worked</div>
+        <div class="mus-row"><i class="mus-dot"></i><span><b>Main</b>${d.main}</span></div>
+        ${d.help?`<div class="mus-row"><i class="mus-dot s"></i><span><b>Helping</b>${d.help}</span></div>`:''}
+        <div class="mus-note">Standard anatomy, not measured activity.</div></div>`;
+  return `<div class="ex-illustration fig-panel"><svg class="fig fig-big" data-fig="${fk}" data-play="1" role="img" aria-label="${ex.name}: movement with working muscles highlighted"></svg>${legend}</div>`;
+}
+function hydrateFigs(root){
+  root.querySelectorAll('svg.fig').forEach(el=>{
+    const d = FIG.EX[el.dataset.fig]; if(!d) return;
+    const big = el.dataset.play==='1';
+    el.setAttribute('viewBox', (d.vb||[0,-8,200,148]).join(' '));
+    const k = big ? (REDUCE ? (d.thumbK===undefined?0.5:d.thumbK) : 0) : (d.thumbK===undefined?0.5:d.thumbK);
+    el.innerHTML = FIG.frame(el.dataset.fig, k);
+  });
+}
+let figLast = 0;
+function figLoop(now){
+  if(!REDUCE && now - figLast > 33){
+    figLast = now;
+    const wk = document.getElementById('view-workouts');
+    if(wk && wk.classList.contains('active')){
+      document.querySelectorAll('.ex-card.open svg.fig[data-play="1"]').forEach(el=>{
+        const d = FIG.EX[el.dataset.fig]; if(!d) return;
+        const T = (d.period||2.6)*1000;
+        const k = 0.5 - 0.5*Math.cos(2*Math.PI*((now % T)/T));
+        el.innerHTML = FIG.frame(el.dataset.fig, k);
+      });
+    }
+  }
+  requestAnimationFrame(figLoop);
+}
+if(typeof requestAnimationFrame!=='undefined') requestAnimationFrame(figLoop);
+
+/* ---------- boot ---------- */
+function refreshAll(){
+  showDay(currentDay);
+  renderStepsCard(); renderSteps(); renderWater(); renderWeightLog();
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('main > section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+load();
+updateSaveBanner();
+showDay(0);
+showMealDay(0);
+renderTaper();
+renderStepsCard();
+renderSteps();
+renderWater();
+renderWeightLog();
+renderScience();
+
+</script>
+</body>
+</html>
